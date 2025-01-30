@@ -16,6 +16,11 @@ struct room{
 	 */
 	unsigned long width;
 	unsigned long height;
+	/*
+	 * This is the things like crates, obstacles,
+	 * and more stuff like that.
+	 */
+	struct element *elements;
 };
 
 #endif
