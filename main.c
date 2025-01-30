@@ -1,4 +1,4 @@
-#include "./mod/map/color.h"
+#include "./mod/display/color.h"
 
 #include <stdlib.h>
 

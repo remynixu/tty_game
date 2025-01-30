@@ -4,6 +4,9 @@
 
 #include <stdio.h>
 
+static struct gridbox gbox_default_def = {COLOR_NULL, '?'};
+struct gridbox *gbox_default = &gbox_default_def;
+
 int isvalgbox(struct gridbox *gbox){
 	if(gbox == NULL || isvalcolor(gbox->color) == 0 || gbox->icon == '\0'){
 		return 1;

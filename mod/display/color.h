@@ -45,6 +45,8 @@ struct color{
 	enum color_id bg;
 };
 
+#define COLOR_NULL	{CATTR_RESET, CID_WHITE, CID_BLACK}
+
 /*
  * Pass to 'fput_color()' to clear screen.
  * Also the default.

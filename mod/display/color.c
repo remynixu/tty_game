@@ -5,7 +5,7 @@
 #include <string.h>
 #include <errno.h>
 
-static struct color color_clear_def = {CATTR_RESET, CID_WHITE, CID_BLACK};
+static struct color color_clear_def = COLOR_NULL;
 struct color *color_clear = &color_clear_def;
 
 void color_cleanup(void){

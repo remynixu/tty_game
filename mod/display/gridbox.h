@@ -5,12 +5,15 @@
 
 #include <stdio.h>
 
-#define gbox_default	{color_clear, '?'}
-
 struct gridbox{
 	struct color *color;
 	char icon;
 };
+
+/*
+ * The default gridbox.
+ */
+extern struct gridbox *gbox_default;
 
 /*
  * Put a gbox to fstream.
