@@ -18,7 +18,7 @@ struct room{
 	unsigned long height;
 	/*
 	 * This is the things like crates, obstacles,
-	 * and more stuff like that.
+	 * and more stuff like that. But not entities.
 	 */
 	struct element *elements;
 };

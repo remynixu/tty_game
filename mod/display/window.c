@@ -4,8 +4,8 @@
 #include <stdio.h>
 
 int isvalwnd(struct window *wnd){
-	if(wnd == NULL || wnd->gboxes == NULL || wnd->width == NULL ||
-		wnd->height == NULL){
+	if(wnd == NULL || wnd->gboxes == NULL || wnd->width == 0 ||
+		wnd->height == 0){
 		return 0;
 	}
 	return 1;
@@ -21,7 +21,8 @@ int fput_wnd(FILE *fstream, struct window *wnd){
 	}
 	if(wnd == NULL){
 		/*
-		 * No, we aren't falling back.
+		 * No, we aren't going to fallback.
+		 * Go give proper window.
 		 */
 		retval = EINVAL;
 		goto out;
