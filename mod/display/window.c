@@ -1,4 +1,4 @@
-#include "window.h"
+#include "./window.h"
 #include "../misc.h"
 
 #include <stdio.h>
@@ -17,14 +17,10 @@ int fput_wnd(FILE *fstream, struct window *wnd){
 	unsigned short height_i = 0;
 	unsigned short i = 0;
 	if(isfstream(fstream) == 0){
-		fstream = stdin;
+		fstream = stdout;
 	}
 	if(wnd == NULL){
-		/*
-		 * No, we aren't going to fallback.
-		 * Go give proper window.
-		 */
-		retval = EINVAL;
+		retval = 1;
 		goto out;
 	}
 	while(height_i < wnd->height){
@@ -36,7 +32,7 @@ int fput_wnd(FILE *fstream, struct window *wnd){
 		if(retval != 0){
 			goto out;
 		}
-		retval = fput_gridbox(fstream, &wnd->gbox[i]);
+		retval = fput_gridbox(fstream, &wnd->gboxes[i]);
 		if(retval != 0){
 			goto out;
 		}

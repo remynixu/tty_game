@@ -1,24 +1,12 @@
 #include "./mod/display/color.h"
+#include "./mod/exit_code.h"
 
-#include <stdlib.h>
-
-int register_cleanupfuncs(void){
-	int retval = EXIT_SUCCESS;
-	retval = atexit(color_cleanup);
-	if(retval != EXIT_SUCCESS){
-		goto out;
-	}
-out:
-	return retval;
-}
-
-int main(void){
-	int retval = EXIT_SUCCESS;
-	struct color test = {CATTR_RESET, CID_RED, CID_BLACK};
-	retval = register_cleanupfuncs();
-	if(retval != EXIT_SUCCESS){
-		goto out;
-	}
-out:
+#ifndef __custom_entry
+int main
+#else
+/* put your custom entry name here */
+#endif /* __custom_entry */
+(void){
+	int retval = EC_SUCCESS;
 	return retval;
 }

@@ -1,23 +1,13 @@
-#include "color.h"
+#include "./color.h"
 #include "../misc.h"
 
 #include <stdio.h>
-#include <string.h>
-#include <errno.h>
 
-static struct color color_clear_def = COLOR_NULL;
-struct color *color_clear = &color_clear_def;
+struct color color_clear = {CATTR_RESET, CID_WHITE, CID_BLACK};
 
 void color_cleanup(void){
-	/*
-	 * What do you even do if the functions
-	 * fail here...
-	 */
-	fput_color(stdout, color_clear);
-	fput_color(stderr, color_clear);
-	/*
-	 * We dont clean stdin, that's weird
-	 */
+	fput_color(stdout, &color_clear);
+	fput_color(stderr, &color_clear);
 	return;
 }
 
@@ -46,19 +36,16 @@ int isvalcolor(struct color *color){
 
 int fput_color(FILE *fstream, struct color *color){
 	int retval = 0;
-	char color_str[] = "\001\033[00;30;40m\002";
+	char color_str[14] = "\001\033[00;30;40m\002";
 	if(isfstream(fstream) == 0){
 		fstream = stdout;
 	}
 	if(isvalcolor(color) == 0){
-		color = color_clear;
+		color = &color_clear;
 	}
 	color_str[4] = color->attr;
 	color_str[7] = color->fg;
 	color_str[10] = color->bg;
-	/*
-	 * Save the EOF error if occured
-	 */
 	retval = fputs(color_str, fstream);
 	return retval;
 }
