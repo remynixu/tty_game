@@ -5,6 +5,8 @@
 
 #include <stdio.h>
 
+#define GBOX_EMPTY	{&color_clear, '?'}
+
 struct gridbox{
 	struct color *color;
 	char icon;

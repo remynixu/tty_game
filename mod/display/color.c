@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-struct color color_clear = {CATTR_RESET, CID_WHITE, CID_BLACK};
+struct color color_clear = COLOR_CLEAR;
 
 void color_cleanup(void){
 	fput_color(stdout, &color_clear);

@@ -7,7 +7,8 @@
 enum element_id{
 	EID_FLOOR = 0,
 	EID_WALL,
-	EID_BOX
+	EID_BOX,
+	EID_MAX /* you touch this I touch you */
 };
 
 struct element{
@@ -17,6 +18,9 @@ struct element{
 };
 
 extern struct element el_floor;
+
+extern int isvaleid(enum element_id id);
+extern int isvalelement(struct element *e);
 
 extern int mk_element(struct element *element, enum element_id);
 

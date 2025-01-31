@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 
+#define COLOR_CLEAR	{CATTR_RESET, CID_WHITE, CID_BLACK}
+
 enum color_attr{
 	CATTR_RESET = '0',
 	CATTR_BOLD = '1',

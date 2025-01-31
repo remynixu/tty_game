@@ -1,12 +1,7 @@
 #include "./mod/display/color.h"
-#include "./mod/exit_code.h"
+#include "./mod/mod_macro.h"
 
-#ifndef __custom_entry
-int main
-#else
-/* put your custom entry name here */
-#endif /* __custom_entry */
-(void){
-	int retval = EC_SUCCESS;
+int ENTRY_NAME(void){
+	int retval = 0;
 	return retval;
 }
