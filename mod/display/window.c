@@ -17,10 +17,11 @@ int fput_wnd(FILE *fstream, struct window *wnd){
 	unsigned short height_i = 0;
 	unsigned short i = 0;
 	if(isfstream(fstream) == 0){
-		fstream = stdout;
+		retval = 1;
+		goto out;
 	}
 	if(isvalwnd(wnd) == 0){
-		retval = 1;
+		retval = 2;
 		goto out;
 	}
 	while(height_i < wnd->height){
@@ -29,7 +30,7 @@ int fput_wnd(FILE *fstream, struct window *wnd){
 			width_i = 0;
 			height_i++;
 		}
-		if(retval != 0){
+		if(retval == EOF){
 			goto out;
 		}
 		retval = fput_gridbox(fstream, &wnd->gboxes[i]);

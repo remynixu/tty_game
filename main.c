@@ -1,8 +1,12 @@
-#include "./mod/mod_macro.h"
+#include "./mod/display/window.h"
 
-extern void memory_test0(void);
+#define ENTRY_NAME	main
+#define NULL		((void *)0)
+
+extern void test0(void);
 
 int ENTRY_NAME(void){
-	memory_test0();
+	test0();
+	color_cleanup();
 	return 0;
 }

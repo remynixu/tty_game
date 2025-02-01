@@ -30,8 +30,6 @@ struct color{
 	enum color_id bg;
 };
 
-extern struct color color_clear;
-
 extern int fput_color(FILE *fstream, struct color *color);
 extern void color_cleanup(void);
 

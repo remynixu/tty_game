@@ -4,28 +4,32 @@
 
 #include <stdio.h>
 
-struct gridbox gbox_empty = GBOX_EMPTY;
-
 int isvalgbox(struct gridbox *gbox){
 	if(gbox == NULL || isvalcolor(gbox->color) == 0 || gbox->icon == '\0'){
-		return 1;
+		return 0;
 	}
-	return 0;
+	return 1;
 }
 
 int fput_gridbox(FILE *fstream, struct gridbox *gbox){
 	int retval = 0;
 	if(isfstream(fstream) == 0){
-		fstream = stdout;
+		retval = 1;
+		goto out;
 	}
 	if(isvalgbox(gbox) == 0){
-		gbox = &gbox_empty;
+		retval = 2;
+		goto out;
 	}
 	retval = fput_color(fstream, gbox->color);
 	if(retval != 0){
+		retval = 3;
 		goto out;
 	}
-	retval = fputc(gbox->icon, fstream);
+	if(fputc(gbox->icon, fstream) == EOF){
+		retval = EOF;
+		goto out;
+	}
 out:
 	return retval;
 }
