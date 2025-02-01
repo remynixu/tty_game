@@ -19,7 +19,7 @@ int fput_wnd(FILE *fstream, struct window *wnd){
 	if(isfstream(fstream) == 0){
 		fstream = stdout;
 	}
-	if(wnd == NULL){
+	if(isvalwnd(wnd) == 0){
 		retval = 1;
 		goto out;
 	}

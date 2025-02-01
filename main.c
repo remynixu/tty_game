@@ -1,7 +1,8 @@
-#include "./mod/display/color.h"
 #include "./mod/mod_macro.h"
 
+extern void memory_test0(void);
+
 int ENTRY_NAME(void){
-	int retval = 0;
-	return retval;
+	memory_test0();
+	return 0;
 }
