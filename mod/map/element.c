@@ -47,5 +47,5 @@ int mk_element(struct element *element, enum element_id id){
 	element->gbox = &gbox_arr[id];
 	element->stat = &phystat_arr[id];
 out:
-	return 0;
+	return retval;
 }

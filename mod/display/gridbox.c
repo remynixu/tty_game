@@ -1,8 +1,8 @@
+#include <stdio.h>
+
 #include "./gridbox.h"
 #include "./color.h"
 #include "./misc.h"
-
-#include <stdio.h>
 
 int isvalgbox(struct gridbox *gbox){
 	if(gbox == NULL || isvalcolor(gbox->color) == 0 || gbox->icon == '\0'){

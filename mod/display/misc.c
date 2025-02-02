@@ -1,6 +1,6 @@
-#include "./misc.h"
-
 #include <stdio.h>
+
+#include "./misc.h"
 
 unsigned long capnum(unsigned long num, unsigned long cap){
 	if(num > cap){

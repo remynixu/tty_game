@@ -9,4 +9,6 @@ struct room{
 	struct element *elements;
 };
 
+extern int mk_room(struct room *room);
+
 #endif

@@ -1,9 +1,9 @@
 #ifndef GRID_H
 #define GRID_H		1
 
-#include "./color.h"
-
 #include <stdio.h>
+
+#include "./color.h"
 
 struct gridbox{
 	struct color *color;

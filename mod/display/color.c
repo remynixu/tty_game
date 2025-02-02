@@ -1,7 +1,7 @@
+#include <stdio.h>
+
 #include "./color.h"
 #include "./misc.h"
-
-#include <stdio.h>
 
 static struct color color_clear = {CATTR_RESET, CID_WHITE, CID_BLACK};
 
