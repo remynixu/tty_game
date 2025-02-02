@@ -13,8 +13,6 @@ int isvalwnd(struct window *wnd){
 
 int fput_wnd(FILE *fstream, struct window *wnd){
 	int retval = 0;
-	unsigned short width_i = 0;
-	unsigned short height_i = 0;
 	unsigned short i = 0;
 	if(isfstream(fstream) == 0){
 		retval = 1;
@@ -24,11 +22,9 @@ int fput_wnd(FILE *fstream, struct window *wnd){
 		retval = 2;
 		goto out;
 	}
-	while(height_i < wnd->height){
-		if(width_i == wnd->width){
+	while(i < (wnd->height * wnd->width)){
+		if(i % wnd->width == 0){
 			retval = fputc('\n', fstream);
-			width_i = 0;
-			height_i++;
 		}
 		if(retval == EOF){
 			goto out;
@@ -37,7 +33,6 @@ int fput_wnd(FILE *fstream, struct window *wnd){
 		if(retval != 0){
 			goto out;
 		}
-		width_i++;
 		i++;
 	}
 out:

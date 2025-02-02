@@ -59,7 +59,7 @@ void test0(void){
 	}
 	wnd->width = 40;
 	wnd->height = 20;
-	wnd->gboxes = balloc(sizeof(struct gridbox) * wnd->width * wnd->height);
+	wnd->gboxes = balloc(sizeof(struct gridbox) * (wnd->width * wnd->height));
 	if(wnd->gboxes == NULL){
 		retval = 1;
 		printf("-%i-\n", retval);

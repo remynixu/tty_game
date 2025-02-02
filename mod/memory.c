@@ -1,11 +1,7 @@
 #include "./memory.h"
 
 #define NULL		((void *)0)
-
 #define STACKMEM_TOP	&stack_memory[STACKMEM_SIZE - 1]
-#define STACKMEM_SIZE	((unsigned short)-1)
-#define STACKMEM_ALIGN	8
-#define STACK_PTRMAX	(STACKMEM_SIZE / STACKMEM_ALIGN)
 
 static unsigned char stack_memory[STACKMEM_SIZE] = {0};
 static unsigned char *stackmem_ptr = STACKMEM_TOP;
@@ -21,6 +17,10 @@ void bclean(int blk_i0, int blk_i1){
 	else{
 		sptop = stack_ptrtable[blk_i1];
 		spbot = stack_ptrtable[blk_i0];
+	}
+	if(sptop == spbot){
+		/* what the actual fuck happened here? */
+		return;
 	}
 	while(spbot != sptop){
 		/* who cares if spbot is actually at the top?
@@ -66,12 +66,15 @@ unsigned long diff_sp(void){
 }
 
 void *balloc(unsigned long nmemb){
-	char blk_i = find_emptyblk();
+	int blk_i = find_emptyblk();
+	if(nmemb > STACKMEM_SIZE){
+		return NULL;
+	}
 	if(blk_i == -1){
 		return NULL;
 	}
 	stackmem_ptr += nmemb;
-	stack_ptrtable[(unsigned char)blk_i] = stackmem_ptr;
+	stack_ptrtable[(unsigned int)blk_i] = stackmem_ptr;
 	return stackmem_ptr;
 }
 
