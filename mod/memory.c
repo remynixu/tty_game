@@ -19,7 +19,9 @@ void bclean(int blk_i0, int blk_i1){
 		spbot = stack_ptrtable[blk_i0];
 	}
 	if(sptop == spbot){
-		/* what the actual fuck happened here? */
+		/* why did the user allocate nothing?
+		 * who knows? */
+		*sptop = 0;
 		return;
 	}
 	while(spbot != sptop){
