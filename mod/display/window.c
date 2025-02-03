@@ -1,40 +1,44 @@
 #include "./window.h"
-#include "./misc.h"
-
-#include <stdio.h>
 
 int isvalwnd(struct window *wnd){
-	if(wnd == NULL || wnd->gboxes == NULL || wnd->width == 0 ||
-		wnd->height == 0){
+	if(wnd == 0 || wnd->gboxes == 0 || wnd->width == 0 || wnd->height == 0){
 		return 0;
 	}
 	return 1;
 }
 
-int fput_wnd(FILE *fstream, struct window *wnd){
-	int retval = 0;
+int mkwnd(struct window *wnd){
+	struct gridbox gbox_default = {mkclr(CATTR_CLEAR, CID_WHITE, CID_BLACK), '?'};
+	int retval;
 	unsigned short i = 0;
-	if(isfstream(fstream) == 0){
+	if(isvalwnd(wnd) == 0){
 		retval = 1;
 		goto out;
 	}
+	while(i < wnd->width * wnd->height){
+		wnd->gboxes[i] = gbox_default;
+	}
+	retval = 0;
+out:
+	return retval;
+}
+
+int fputwnd(FILE *f, struct window *wnd){
+	int retval;
+	int printbnum = 0;
+	unsigned short i = 0;
 	if(isvalwnd(wnd) == 0){
-		retval = 2;
+		retval = EOF;
 		goto out;
 	}
-	while(i < (wnd->height * wnd->width)){
-		if(i % wnd->width == 0){
-			retval = fputc('\n', fstream);
-		}
+	while(i < wnd->width * wnd->height){
+		retval = fputgbox(f, wnd->gboxes[i]);
 		if(retval == EOF){
 			goto out;
 		}
-		retval = fput_gridbox(fstream, &wnd->gboxes[i]);
-		if(retval != 0){
-			goto out;
-		}
-		i++;
+		printbnum += retval;
 	}
+	retval = printbnum;
 out:
 	return retval;
 }

@@ -1,16 +1,14 @@
-#ifndef GRID_H
-#define GRID_H		1
-
-#include <stdio.h>
+#ifndef GRIDBOX_H
+#define GRIDBOX_H	1
 
 #include "./color.h"
 
 struct gridbox{
-	struct color *color;
+	unsigned char clrinfo;
 	char icon;
 };
 
-extern int fput_gridbox(FILE *fstream, struct gridbox *gbox);
-extern int isvalgbox(struct gridbox *gbox);
+extern int isvalgbox(struct gridbox gbox);
+extern int fputgbox(FILE *f, struct gridbox gbox);
 
-#endif
+#endif /* GRIDBOX_H */

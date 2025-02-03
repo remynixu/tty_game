@@ -1,55 +1,73 @@
-#include <stdio.h>
-
 #include "./color.h"
-#include "./misc.h"
 
-static struct color color_clear = {CATTR_RESET, CID_WHITE, CID_BLACK};
+#define ID_MAX		0x7
+#define ATTR_MAX	0x1
 
-void color_cleanup(void){
-	fput_color(stdout, &color_clear);
-	fput_color(stderr, &color_clear);
-	return;
+#define ID_BITSIZE	0x3
+#define ATTR_BITSIZE	0x1
+
+#define BG_OFFSET	0x0
+#define FG_OFFSET	(ID_BITSIZE + BG_OFFSET)
+#define ATTR_OFFSET	(ID_BITSIZE + FG_OFFSET)
+
+unsigned char getbytebitn(unsigned char byte, unsigned char nmemb, unsigned char offset){
+	return ((byte << (sizeof(unsigned char) - nmemb - offset)) >> (sizeof(unsigned char) - nmemb - offset));
 }
 
-int isvalcid(enum color_id cid){
-	if(cid <= CID_WHITE && cid >= CID_BLACK){
-		return 1;
-	}
-	return 0;
-}
-
-int isvalcattr(enum color_attr cattr){
-	if(cattr == CATTR_RESET || cattr == CATTR_BOLD || cattr == CATTR_INVERSE ||
-		cattr == CATTR_UNDER || cattr == CATTR_STRIKE){
-		return 1;
-	}
-	return 0;
-}
-
-int isvalcolor(struct color *color){
-	if(color == NULL || isvalcattr(color->attr) == 0 ||
-		isvalcid(color->fg) == 0 || isvalcid(color->bg) == 0){
-		return 0;
-	}
-	return 1;
-}
-
-int fput_color(FILE *fstream, struct color *color){
-	int retval = 0;
-	char color_str[14] = "\001\033[00;30;40m\002";
-	if(isfstream(fstream) == 0){
-		retval = 1;
+int isvalclr(unsigned char clr){
+	int retval;
+	/* gingus - BONErr */
+	if(getbytebitn(clr, ID_BITSIZE, BG_OFFSET) > ID_MAX){
+		retval = 0;
 		goto out;
 	}
-	if(isvalcolor(color) == 0){
-		retval = 2;
+	if(getbytebitn(clr, ID_BITSIZE, FG_OFFSET) > ID_MAX){
+		retval = 0;
 		goto out;
 	}
-	color_str[4] = color->attr;
-	color_str[7] = color->fg;
-	color_str[10] = color->bg;
-	if(fputs(color_str, fstream) == EOF){
+	if(getbytebitn(clr, ATTR_BITSIZE, ATTR_OFFSET) > ATTR_MAX){
+		retval = 0;
+		goto out;
+	}
+	retval = 1;
+out:
+	return retval;
+}
+
+unsigned char mkclr(enum color_attr attr, enum color_id fg, enum color_id bg){
+	unsigned char retval;
+	if(attr > ATTR_MAX){
+		retval = 0;
+		goto out;
+	}
+	if(fg > ID_MAX){
+		retval = 0;
+		goto out;
+	}
+	if(bg > ID_MAX){
+		retval = 0;
+		goto out;
+	}
+	retval = 0;
+	retval |= (attr << ATTR_OFFSET);
+	retval |= (fg << FG_OFFSET);
+	retval |= (bg << BG_OFFSET);
+out:
+	return retval;
+}
+
+int fputclr(FILE *fstream, unsigned char clr){
+	int retval;
+	char clrstr[] = "\001\033[0;30;40m\002";
+	if(isvalclr(clr) == 0){
 		retval = EOF;
+		goto out;
+	}
+	clrstr[3] = getbytebitn(clr, ATTR_BITSIZE, ATTR_OFFSET);
+	clrstr[6] = getbytebitn(clr, ID_BITSIZE, FG_OFFSET);
+	clrstr[9] = getbytebitn(clr, ID_BITSIZE, BG_OFFSET);
+	retval = fputs(clrstr, fstream);
+	if(retval == EOF){
 		goto out;
 	}
 out:

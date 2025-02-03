@@ -3,38 +3,26 @@
 
 #include <stdio.h>
 
-#define COLOR_CLEAR	{CATTR_RESET, CID_WHITE, CID_BLACK}
+enum color_id{
+	CID_BLACK = 0x0,
+	CID_RED = 0x1,
+	CID_GREEN = 0x2,
+	CID_YELLOW = 0x3,
+	CID_BLUE = 0x4,
+	CID_PURPLE = 0x5,
+	CID_CYAN = 0x6,
+	CID_WHITE = 0x7
+};
 
 enum color_attr{
-	CATTR_RESET = '0',
-	CATTR_BOLD = '1',
-	CATTR_UNDER = '4',
-	CATTR_INVERSE = '7',
-	CATTR_STRIKE = '9'
+	CATTR_CLEAR = 0x0,
+	CATTR_BOLD = 0x1
 };
 
-enum color_id{
-	CID_BLACK = '0',
-	CID_RED,
-	CID_GREEN,
-	CID_YELLOW,
-	CID_BLUE,
-	CID_PURPLE,
-	CID_CYAN,
-	CID_WHITE
-};
+extern unsigned char getbytebitn(unsigned char byte, unsigned char nmemb, unsigned char offset);
+extern unsigned char mkclr(enum color_attr attr, enum color_id fg, enum color_id bg);
 
-struct color{
-	enum color_attr attr;
-	enum color_id fg;
-	enum color_id bg;
-};
+extern int isvalclr(unsigned char clr);
+extern int fputclr(FILE *f, unsigned char clr);
 
-extern int fput_color(FILE *fstream, struct color *color);
-extern void color_cleanup(void);
-
-extern int isvalcid(enum color_id cid);
-extern int isvalcattr(enum color_attr cattr);
-extern int isvalcolor(struct color *color);
-
-#endif
+#endif /* COLOR_H */

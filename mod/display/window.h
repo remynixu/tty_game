@@ -1,8 +1,6 @@
 #ifndef WINDOW_H
 #define WINDOW_H	1
 
-#include <stdio.h>
-
 #include "./gridbox.h"
 
 struct window{
@@ -11,6 +9,8 @@ struct window{
 	unsigned char height;
 };
 
-extern int fput_wnd(FILE *fstream, struct window *wnd);
+extern int mkwnd(struct window *wnd);
+extern int isvalwnd(struct window *wnd);
+extern int fput_wnd(FILE *f, struct window *wnd);
 
-#endif
+#endif /* WINDOW_H */

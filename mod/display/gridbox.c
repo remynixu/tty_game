@@ -1,35 +1,28 @@
-#include <stdio.h>
-
 #include "./gridbox.h"
-#include "./color.h"
-#include "./misc.h"
 
-int isvalgbox(struct gridbox *gbox){
-	if(gbox == NULL || isvalcolor(gbox->color) == 0 || gbox->icon == '\0'){
+int isvalgbox(struct gridbox gbox){
+	if(isvalclr(gbox.clrinfo) == 0 || gbox.icon == 0){
 		return 0;
 	}
 	return 1;
 }
 
-int fput_gridbox(FILE *fstream, struct gridbox *gbox){
-	int retval = 0;
-	if(isfstream(fstream) == 0){
-		retval = 1;
-		goto out;
-	}
+int fputgbox(FILE *f, struct gridbox gbox){
+	int retval;
+	int printedbnum = 0;
 	if(isvalgbox(gbox) == 0){
-		retval = 2;
-		goto out;
-	}
-	retval = fput_color(fstream, gbox->color);
-	if(retval != 0){
-		retval = 3;
-		goto out;
-	}
-	if(fputc(gbox->icon, fstream) == EOF){
 		retval = EOF;
 		goto out;
 	}
+	retval = fputclr(f, gbox.clrinfo);
+	if(retval == EOF){
+		goto out;
+	}
+	printedbnum = fputc(gbox.icon, f);
+	if(printedbnum == EOF){
+		goto out;
+	}
+	retval += printedbnum;
 out:
 	return retval;
 }
