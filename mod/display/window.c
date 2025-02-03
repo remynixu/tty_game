@@ -8,13 +8,14 @@ int isvalwnd(struct window *wnd){
 }
 
 int mkwnd(struct window *wnd){
-	struct gridbox gbox_default = {mkclr(CATTR_CLEAR, CID_WHITE, CID_BLACK), '?'};
+	struct gridbox gbox_default = {0, '?'};
 	int retval;
 	unsigned short i = 0;
 	if(isvalwnd(wnd) == 0){
 		retval = 1;
 		goto out;
 	}
+	gbox_default.clrinfo = mkclr(CATTR_CLEAR, CID_WHITE, CID_BLACK);
 	while(i < wnd->width * wnd->height){
 		wnd->gboxes[i] = gbox_default;
 	}
