@@ -1,9 +1,10 @@
 BIN = GAME
 CC = gcc
 SUM = sum
-CFLAGS = -std=c89 -Wpedantic -Wall -g
+CFLAGS = -std=c89 -Wpedantic -Wall -g -fno-builtin
 
-SRC = $(wildcard *.c) $(wildcard */*.c) $(wildcard */*/*.c)
+SRC = $(wildcard *.c) $(wildcard */*.c) \
+      $(wildcard */*/*.c) $(wildcard */*/*/*.c)
 OBJS = $(SRC:.c=.o)
 
 $(BIN): $(OBJS)

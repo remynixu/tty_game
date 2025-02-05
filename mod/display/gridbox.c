@@ -1,28 +1,18 @@
 #include "./gridbox.h"
 
 int isvalgbox(struct gridbox gbox){
-	if(isvalclr(gbox.clrinfo) == 0 || gbox.icon == 0){
+	if(isvalclr(gbox.packed_clr) == 0 || gbox.icon == 0){
 		return 0;
 	}
 	return 1;
 }
 
-int fputgbox(FILE *f, struct gridbox gbox){
-	int retval;
-	int printedbnum = 0;
-	if(isvalgbox(gbox) == 0){
-		retval = EOF;
-		goto out;
+struct gridbox mkgbox(char icon, unsigned char packed_clr){
+	struct gridbox gbox = {0, 0};
+	if(isvalclr(packed_clr) == 0 || icon == 0){
+		return gbox;
 	}
-	retval = fputclr(f, gbox.clrinfo);
-	if(retval == EOF){
-		goto out;
-	}
-	printedbnum = fputc(gbox.icon, f);
-	if(printedbnum == EOF){
-		goto out;
-	}
-	retval += printedbnum;
-out:
-	return retval;
+	gbox.icon = icon;
+	gbox.packed_clr = packed_clr;
+	return gbox;
 }
