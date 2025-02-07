@@ -7,6 +7,7 @@
 
 /* the options available for coloring the
  * screen are here. */
+
 enum color_id{
 	CID_BLACK = AC_BLACK,
 	CID_RED = AC_RED,
@@ -36,7 +37,7 @@ enum color_id{
 /* changes the color of the next print,
  * returns non-zero on success, IO_ERR on fail. */
 
-#define printclr(clr)	printansiclr((clr))
+#define putclr(clr)	putansiclr((clr))
 
 #else
 
@@ -47,7 +48,7 @@ enum color_id{
  * also, please put the implementations to abstract, on
  * the ./color directory. thank you. */
 
-#include
+#include	"./color/*"
 
 enum color_attr{
 };
@@ -58,7 +59,7 @@ enum color_id{
 #define mkclr(fg, bg)
 #define isvalcid(id)
 #define isvalclr(byte)
-#define printclr(clr)
+#define putclr(clr)
 
 #endif /* !__no_ansi */
 

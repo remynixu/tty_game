@@ -23,7 +23,7 @@ unsigned char mkansiclr(unsigned char fg, unsigned char bg){
 	return packed_clr;
 }
 
-int printansiclr(unsigned char packed_clr){
+int putansiclr(unsigned char packed_clr){
 	char clrstr[5] = "\033[30m";
 	int retval = 0;
 	int printedb = 0;

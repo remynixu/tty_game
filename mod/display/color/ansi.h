@@ -16,6 +16,6 @@ extern unsigned char mkansiclr(unsigned char fg, unsigned char bg);
 
 extern int isvalansicid(unsigned char color_id);
 extern int isvalansiclr(unsigned char packed_clr);
-extern int printansiclr(unsigned char packed_clr);
+extern int putansiclr(unsigned char packed_clr);
 
 #endif /* ANSI_H */
