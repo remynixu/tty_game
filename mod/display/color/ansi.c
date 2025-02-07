@@ -9,7 +9,7 @@ int isvalansicid(unsigned char color_id){
 }
 
 int isvalansiclr(unsigned char packed_clr){
-	if(isvalansicid((packed_clr << 4) >> 4) == 0 || isvalansicid((packed_clr >> 4) << 4) == 0){
+	if(isvalansicid(packed_clr >> 4) == 0 || isvalansicid(packed_clr & 0x0f) == 0){
 		return 0;
 	}
 	return 1;
@@ -24,7 +24,7 @@ unsigned char mkansiclr(unsigned char fg, unsigned char bg){
 }
 
 int putansiclr(unsigned char packed_clr){
-	char clrstr[5] = "\033[30m";
+	char clrstr[6] = "\033[30m";
 	int retval = 0;
 	int printedb = 0;
 	if(isvalansiclr(packed_clr) == 0){
@@ -37,7 +37,7 @@ int putansiclr(unsigned char packed_clr){
 	}
 	printedb += retval;
 	clrstr[2] = '4';
-	clrstr[3] = ((packed_clr << 4) >> 4) + '0';
+	clrstr[3] = (packed_clr & 0xf0) + '0';
 	retval = printb(clrstr);
 	if(retval == IO_ERR){
 		return IO_ERR;

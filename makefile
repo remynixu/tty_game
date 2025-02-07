@@ -1,7 +1,7 @@
 BIN = GAME
 CC = gcc
 SUM = sum
-CFLAGS = -std=c89 -Wpedantic -Wall -g -fno-builtin
+CFLAGS = -std=c89 -Wpedantic -Wall -g -fno-builtin -O0
 
 SRC = $(wildcard *.c) $(wildcard */*.c) \
       $(wildcard */*/*.c) $(wildcard */*/*/*.c)

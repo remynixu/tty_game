@@ -12,5 +12,6 @@ struct window{
 extern struct window mkwnd(struct gridbox *gboxes, unsigned short size, unsigned char width);
 
 extern int printwnd(struct window *wnd);
+extern int isvalwnd(struct window *wnd);
 
 #endif /* WINDOW_H */

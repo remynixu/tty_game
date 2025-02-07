@@ -10,7 +10,7 @@ int isvalwnd(struct window *wnd){
 
 struct window mkwnd(struct gridbox *gboxes, unsigned short size, unsigned char width){
 	struct window wndinfo = {0};
-	if(gboxes == 0 || size == 0 || width == 0 || size % width != 0){
+	if(gboxes == 0 || size == 0 || width == 0){
 		return wndinfo;
 	}
 	wndinfo.gboxes = gboxes;

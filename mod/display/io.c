@@ -6,6 +6,7 @@ int printb(char *bytes){
 		if(putb(bytes[i]) == IO_ERR){
 			return IO_ERR;
 		}
+		i++;
 	}
 	return i;
 }
