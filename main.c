@@ -9,9 +9,6 @@
 #define WNDSIZE		(WNDWIDTH * WNDHEIGHT)
 
 int ENTRY_NAME(void){
-	struct gridbox gbox = {0};
-	gbox.packed_clr = mkclr(CID_WHITE, CID_BLACK);
-	gbox.icon = '?';
-	putgbox(gbox);
-	return 0;
+	unsigned char clr = mkclr(CID_RED, CID_PURPLE);
+	return putclr(clr);
 }

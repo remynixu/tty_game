@@ -9,7 +9,7 @@ int isvalansicid(unsigned char color_id){
 }
 
 int isvalansiclr(unsigned char packed_clr){
-	if(isvalansicid(packed_clr >> 4) == 0 || isvalansicid(packed_clr & 0x0f) == 0){
+	if(isvalansicid(packed_clr >> 4) == 0 || isvalansicid(packed_clr & 0xf0) == 0){
 		return 0;
 	}
 	return 1;
