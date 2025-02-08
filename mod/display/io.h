@@ -12,7 +12,7 @@
  * and the next call *must* put a byte *adjacent* to it
  * or to the *next line*.
  *
- * the required return value is either the byte "put" or
+ * the required return value is either the byte *put* or
  * IO_ERR on failure. */
 
 #define putb(byte)	putchar((byte))
@@ -20,21 +20,21 @@
 
 #else
 
-/* insert custom library here (preferably on ./io directory).
- * do note that you must also provide what the
- * top directive provided i.e putb(), IO_ERR, etc...
+/* insert custom library here (preferably on ./io
+ * directory). do note that you must also provide whats
+ * the top directive provided i.e putb(), IO_ERR, etc...
  *
  * also follow the behavior listed above. */
 
-#include
+#include "./io/your_custom_io.h"
 
-#define putb(byte)
-#define IO_ERR
+#define putb(byte)	your_putchar((byte))
+#define IO_ERR		YOUR_IO_ERR
 
 #endif /* !__no_stdio */
 
 /* print multiple bytes in order.
- * returns count of bytes printed or IO_ERR on failure. */
+ * returns count of bytes printed or IO_ERR on fail. */
 
 extern int printb(char *bytes);
 

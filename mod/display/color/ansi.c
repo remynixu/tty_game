@@ -2,6 +2,10 @@
 #include "../io.h"
 
 int isvalansicid(unsigned char color_id){
+	/* arg is supposed to be 4-bits */
+	if((color_id >> 4) != 0){
+		return 0;
+	}
 	if(color_id > AC_WHITE){
 		return 0;
 	}
@@ -9,7 +13,10 @@ int isvalansicid(unsigned char color_id){
 }
 
 int isvalansiclr(unsigned char packed_clr){
-	if(isvalansicid(packed_clr >> 4) == 0 || isvalansicid(packed_clr & 0xf0) == 0){
+	if(isvalansicid(packed_clr >> 4) == 0){
+		return 0;
+	}
+	if(isvalansicid(packed_clr & 0x0f) == 0){
 		return 0;
 	}
 	return 1;
@@ -37,7 +44,7 @@ int putansiclr(unsigned char packed_clr){
 	}
 	printedb += retval;
 	clrstr[2] = '4';
-	clrstr[3] = (packed_clr & 0xf0) + '0';
+	clrstr[3] = (packed_clr & 0x0f) + '0';
 	retval = printb(clrstr);
 	if(retval == IO_ERR){
 		return IO_ERR;

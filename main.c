@@ -9,6 +9,8 @@
 #define WNDSIZE		(WNDWIDTH * WNDHEIGHT)
 
 int ENTRY_NAME(void){
-	unsigned char clr = mkclr(CID_RED, CID_PURPLE);
-	return putclr(clr);
+	unsigned char clr = mkclr(CID_BLUE, CID_BLACK);
+	putclr(clr);
+	putb('&');
+	return 0;
 }
