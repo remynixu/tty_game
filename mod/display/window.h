@@ -1,17 +1,13 @@
 #ifndef WINDOW_H
-#define WINDOW_H	1
+#define WINDOW_H
 
-#include "./gridbox.h"
+#include "./icons.h"
 
-struct window{
-	struct gridbox *gboxes;
-	unsigned char width;
-	unsigned char height;
-};
+#define WNDWIDTH	40
+#define WNDHEIGHT	20
 
-extern struct window mkwnd(struct gridbox *gboxes, unsigned short size, unsigned char width);
+extern struct icon window[WNDWIDTH * WNDHEIGHT];
 
-extern int printwnd(struct window *wnd);
-extern int isvalwnd(struct window *wnd);
+extern int putwnd(void);
 
 #endif /* WINDOW_H */

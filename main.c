@@ -1,7 +1,6 @@
-#include "./mod/display/window.h"
-#include "./mod/display/gridbox.h"
+#include "./mod/display/icon.h"
+#include "./mod/display/graphic.h"
 #include "./mod/display/color.h"
-#include "./mod/display/io.h"
 
 #define ENTRY_NAME	main
 #define WNDWIDTH	40
@@ -9,8 +8,6 @@
 #define WNDSIZE		(WNDWIDTH * WNDHEIGHT)
 
 int ENTRY_NAME(void){
-	unsigned char clr = mkclr(CID_BLUE, CID_BLACK);
-	putclr(clr);
-	putb('&');
+	puticon(mkicon(INVALCLR, INVALGB));
 	return 0;
 }
