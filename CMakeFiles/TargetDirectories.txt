@@ -1,0 +1,3 @@
+/data/data/com.termux/files/home/tty_game/CMakeFiles/tty_game.dir
+/data/data/com.termux/files/home/tty_game/CMakeFiles/edit_cache.dir
+/data/data/com.termux/files/home/tty_game/CMakeFiles/rebuild_cache.dir
