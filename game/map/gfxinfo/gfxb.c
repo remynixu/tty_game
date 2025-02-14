@@ -8,7 +8,9 @@
 
 struct gfxb mkgfxb(char clr, char icon){
 	struct gfxb gfxb;
+#ifndef __NOCLR
 	gfxb.clr = clr;
+#endif /* __NOCLR */
 	gfxb.icon = icon;
 	return gfxb;
 }

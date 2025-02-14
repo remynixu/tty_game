@@ -1,6 +1,8 @@
 #include "./clr.h"
 #include "../../../tty/out.h"
 
+#ifndef __NOCLR
+
 char mkclr(char fg, char bg){
 	return (fg << 4) | bg;
 }
@@ -20,3 +22,5 @@ char putclr(char clr){
 	}
 	return 0;
 }
+
+#endif /* __NOCLR */

@@ -5,7 +5,9 @@
  * more compact and memory friendly. */
 
 struct gfxb{
+#ifndef __NOCLR
 	char clr;
+#endif /* __NOCLR */
 	char icon;
 };
 
