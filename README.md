@@ -1,3 +1,4 @@
+```
 BRIEF:
 This project is for funsies :)
 This is just a game for terminals.
@@ -11,3 +12,4 @@ I don't accept contribs, but you can do whatever
    you want with this code... as long as you dont
    violate the license ;)
 If there are issues/misinformation. Let me know!
+```
