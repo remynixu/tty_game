@@ -1,11 +1,14 @@
 #include "./clr.h"
-#include "../../../tty/out.h"
+#include "./io/out.h"
 
 #ifndef __NOCLR
 
 char mkclr(char fg, char bg){
 	return (fg << 4) | bg;
 }
+
+/* do note that this implementation is meant to be
+ * easy to change. */
 
 static char clrstr[6] = "\033[37m";
 

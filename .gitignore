@@ -1,14 +1,6 @@
-# ./build/ junks
-/build/
-
-# build-system junks
+build
 *.o
-# windows
-*.exe
-# linux/unix
 *.bin
-
-# miscellaneous
 *.swp
 *.bak
 *.log

@@ -16,21 +16,19 @@ enum clr_id{
 
 #ifndef __NOCLR
 
-/* returns a valid color, its not expected that this
- * function will ever fail other than you. */
+/* we need mkclr to turn the clr_id's to comprehendable
+ * (implementation-wise) data for putclr().
+ *
+ * arrays wont do the trick here, they shouldnt, they
+ * WILL NOT. */
 
-extern char mkclr(char fg, char bg);
-
-/* put color on terminal, return 0 on success, OUT_ERR
- * on fail. */
-
+extern char mkclr(char cid_fg, char cid_bg);
 extern char putclr(char clr);
 
-/* if colors dont exist, turn the functions to no ops */
 #else
 
-#define mkclr(fg, bg)	do{}while(0)
-#define putclr(clr)	do{}while(0)
+#define mkclr(cid, cid)	0
+#define putclr(clr)	0
 
 #endif /* __NOCLR */
 

@@ -5,11 +5,11 @@
  * slight parting from tty_game standards. */
 
 char pollb(void){
-	int retval = getc(stdin);
+	char retval = getc(stdin);
 	if(retval == EOF){
 		return POLL_ERR;
 	}
-	return (char)retval;
+	return retval;
 }
 
 char pollnb(char count){
