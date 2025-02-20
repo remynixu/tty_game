@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.10)
 project(tty_game C)
 
 set(CMAKE_BINARY_DIR "./build")
-set(CMAKE_SOURCE_DIR "./")
 set(CMAKE_C_STANDARD 90)
 set(CMAKE_C_FLAGS "-Wall -Wextra -Wpedantic")
 
@@ -19,5 +18,5 @@ else()
 	message("> COLORMODE error")
 endif()
 
-file(GLOB_RECURSE SOURCES "*.c")
+file(GLOB_RECURSE SOURCES "src/*.c")
 add_executable(tty_game ${SOURCES})

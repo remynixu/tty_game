@@ -1,0 +1,52 @@
+.TH "src/lib/math.h" 3 "tty_game" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+src/lib/math.h
+.SH SYNOPSIS
+.br
+.PP
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBabs\fP(x)"
+.br
+.ti -1c
+.RI "#define \fBabsmin\fP(x,  y)"
+.br
+.ti -1c
+.RI "#define \fBabsmax\fP(x,  y)"
+.br
+.ti -1c
+.RI "#define \fBABSMAX\fP   \fBabs\fP((char)0xff)"
+.br
+.in -1c
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define abs( x)"
+\fBValue:\fP
+.nf
+((x) & 0x7f)
+.PP
+.fi
+
+.SS "#define ABSMAX   \fBabs\fP((char)0xff)"
+
+.SS "#define absmax( x,  y)"
+\fBValue:\fP
+.nf
+    (abs(x) > abs(y) ? abs(x) : abs(y))
+.PP
+.fi
+
+.SS "#define absmin( x,  y)"
+\fBValue:\fP
+.nf
+    (abs(x) < abs(y) ? abs(x) : abs(y))
+.PP
+.fi
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for tty_game from the source code\&.

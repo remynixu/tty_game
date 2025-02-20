@@ -1,0 +1,30 @@
+.TH "src/lib/assert.h" 3 "tty_game" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+src/lib/assert.h
+.SH SYNOPSIS
+.br
+.PP
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fB__assert\fP(expr)"
+.br
+.in -1c
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define __assert( expr)"
+\fBValue:\fP
+.nf
+    if((expr) == 0){ \\
+        char *brk; \\
+        brk[9] = 8; \\
+    }
+.PP
+.fi
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for tty_game from the source code\&.

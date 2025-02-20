@@ -1,0 +1,45 @@
+.TH "src/game/map/cntxt/obj/obj.c" 3 "tty_game" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+src/game/map/cntxt/obj/obj.c
+.SH SYNOPSIS
+.br
+.PP
+\fR#include '\&./obj\&.h'\fP
+.br
+
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "struct \fBobj\fP \fBobj_table\fP [\fBOBJID_MAX\fP]"
+.br
+.in -1c
+.SH "Variable Documentation"
+.PP 
+.SS "struct \fBobj\fP obj_table[\fBOBJID_MAX\fP]"
+\fBInitial value:\fP
+.nf
+= {
+    {
+        OBJAID_NORMAL,
+        {
+            0x00,
+            0x00
+        }
+    },
+    {
+        OBJAID_NORMAL,
+        {
+            0xff,
+            0xff
+        }
+    },
+}
+.PP
+.fi
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for tty_game from the source code\&.
