@@ -1,6 +1,9 @@
 #include "./game/wnd.h"
 
 int main(void){
-	putwnd(wndalloc());
+	struct wnd *mainwnd = wndalloc();
+	wputc(mainwnd, '8', 4, 0);
+	putwnd(mainwnd);
+	wndfree(mainwnd);
 	return 0;
 }
