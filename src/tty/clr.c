@@ -1,21 +1,20 @@
 #include "./clr.h"
-#include "./out.h"
+#include "./io.h"
 
-unsigned char mkclr(enum clr_id fg,
-		enum clr_id bg){
+#include "../lib/def.h"
+
+uint8_t mkclr(enum clr_id fg, enum clr_id bg){
 	return (fg << 4) | bg;
 }
 
-int putclr(unsigned char clr){
-	char str[] = "\033[30m";
-	str[3] = (clr >> 4) + '0';
-	if(printb(str) == OUT_ERR){
-		return -1;
-	}
-	str[2] = '4';
-	str[3] = (clr & 0x0f) + '0';
-	if(printb(str) == OUT_ERR){
-		return -1;
-	}
-	return 0;
+uint8_t putclr(uint8_t clr){
+	char escstr[] = "\033[30m";
+	escstr[3] = (clr >> 4) + '0';
+	if(printb(escstr) == IO_ERR)
+		return IO_ERR;
+	escstr[2]++;
+	escstr[3] = (clr & 0x0f) + '0';
+	if(printb(escstr) == IO_ERR)
+		return IO_ERR;
+	return clr;
 }

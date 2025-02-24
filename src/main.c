@@ -1,9 +1,6 @@
-#include "./game/wnd.h"
+#include "./test/tty/test_io.h"
 
 int main(void){
-	struct wnd *mainwnd = wndalloc();
-	wputc(mainwnd, '8', 4, 0);
-	putwnd(mainwnd);
-	wndfree(mainwnd);
+	test_io();
 	return 0;
 }

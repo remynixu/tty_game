@@ -1,6 +1,8 @@
 #ifndef CLR_H
 #define CLR_H
 
+#include "../lib/def.h"
+
 enum clr_id{
 	CID_BLACK,
 	CID_RED,
@@ -12,8 +14,8 @@ enum clr_id{
 	CID_WHITE
 };
 
-extern unsigned char mkclr(enum clr_id fg,
+extern uint8_t mkclr(enum clr_id fg,
 		enum clr_id bg);
-extern int putclr(unsigned char clr);
+extern uint8_t putclr(uint8_t clr);
 
 #endif /* CLR_H */
