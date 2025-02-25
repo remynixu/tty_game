@@ -1,10 +1,12 @@
 #ifndef IO_H
 #define IO_H
 
-#define IO_ERR		-1
+#include "../lib/def.h"
 
-extern int putb(char c);
-extern int printb(char *str);
+#define IO_ERR		0xff
+
+extern char putb(char c);
+extern char printstr(char *str);
 
 extern char pollb(void);
 

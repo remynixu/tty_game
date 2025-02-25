@@ -1,5 +1,6 @@
+#include "../../tty/io.h"
 
 #define test_io() { \
 	putb(pollb()); \
-	printb("help me\n"); \
+	printstr("help me\n"); \
 }

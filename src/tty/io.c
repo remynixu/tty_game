@@ -1,19 +1,18 @@
 #include "./io.h"
 #include <stdio.h>
 
-int putb(char c){
-	int b = putchar(c);
-	if(b == EOF)
+char putb(char c){
+	if(putchar(c) == EOF)
 		return IO_ERR;
-	return b;
+	return c;
 }
 
-int printb(char *str){
+char printstr(char *str){
 	char *strstart = str;
 	while(*str != 0)
 		if(putb(*str++) == IO_ERR)
 			return IO_ERR;
-	return (str - strstart);
+	return (strstart - str);
 }
 
 char pollb(void){
