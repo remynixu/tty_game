@@ -7,35 +7,22 @@
 #define SCRBUFSIZE \
 	(SCRBUFWIDTH * SCRBUFHEIGHT)
 
-struct scrbuf{
+static struct{
 	char icons[SCRBUFSIZE];
 	uint8_t clrs[SCRBUFSIZE];
-};
+}scrbuf;
 
-static struct scrbuf scrbuf;
-
-void clrscrbuf(void){
-	int i = 0;
-	while(i < SCRBUFSIZE){
-		scrbuf.icons[i] = ' ';
-		scrbuf.clrs[i] = mkclr(
-				CID_WHITE,
-				CID_BLACK);
-		i++;
-	}
-}
-
-int wndpos(uint8_t x, uint8_t y){
+uint16_t tosbpos(uint8_t x, uint8_t y){
 	return x + (SCRBUFWIDTH * y);
 }
 
-int putscrbufrow(uint8_t y){
+int putsbrow(uint8_t y){
 	uint8_t x = 0;
 	while(x < SCRBUFWIDTH){
-		if(putclr(scrbuf.clrs[wndpos(x,
+		if(putclr(scrbuf.clrs[tosbpos(x,
 				y)]) == IO_ERR)
 			return IO_ERR;
-		if(putb(scrbuf.icons[wndpos(x,
+		if(putb(scrbuf.icons[tosbpos(x,
 				y)]) == IO_ERR)
 			return IO_ERR;
 		x++;
@@ -43,8 +30,8 @@ int putscrbufrow(uint8_t y){
 	return 0;
 }
 
-int putscrbuf(void){
-	int put_y = SCRBUFHEIGHT;
+int putsb(void){
+	int put_y = SCRBUFHEIGHT - 1;
 	/*
 	 * Thu. Feb. 07, 2025
 	 *
@@ -59,12 +46,32 @@ int putscrbuf(void){
 	 * |			+-----
 	 *
 	 */
-	while(put_y <= SCRBUFHEIGHT){
-		if(putscrbufrow(put_y) == IO_ERR)
+	do{
+		if(putsbrow(put_y) == IO_ERR)
 			return IO_ERR;
 		if(putb('\n') == IO_ERR)
 			return IO_ERR;
 		put_y--;
 	}
+	while(put_y != 0);
 	return 0;
 }
+
+void clrsb(void){
+	int i = 0;
+	while(i < SCRBUFSIZE){
+		scrbuf.icons[i] = ' ';
+		scrbuf.clrs[i] = mkclr(
+				CID_WHITE,
+				CID_BLACK);
+		i++;
+	}
+}
+
+void sbputc(char c, uint16_t sbpos){
+	scrbuf.icons[sbpos] = c;
+}
+
+void sbputclr(uint8_t clr, uint16_t sbpos){
+	scrbuf.clrs[sbpos] = clr;
+}	

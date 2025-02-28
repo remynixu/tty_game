@@ -3,9 +3,14 @@
 
 #include "../lib/def.h"
 
-extern int putscrbuf(void);
+extern uint16_t tosbpos(uint8_t x, uint8_t y);
 
-extern void sbputc(char c);
-extern void sbputclr(uint8_t clr);
+extern int putsbrow(uint8_t y);
+extern int putsb(void);
+
+extern void clrsb(void);
+extern void sbputc(char c, uint16_t sbpos);
+extern void sbputclr(uint8_t clr,
+		uint16_t sbpos);
 
 #endif /* SCRBUF_H */

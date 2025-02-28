@@ -12,7 +12,7 @@ char printstr(char *str){
 	while(*str != 0)
 		if(putb(*str++) == IO_ERR)
 			return IO_ERR;
-	return (strstart - str);
+	return (str - strstart);
 }
 
 char pollb(void){
