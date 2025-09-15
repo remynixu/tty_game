@@ -1,46 +1,70 @@
 #include "screen.h"
-
-#include <stdio.h>
+#include <assert.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <ctype.h>
 
+static struct{
+	enum{
+		SUCCESS = 0,
+		SYMBOL_ERROR,
+		IO_ERROR,
+		FAILURE
+	}error;
+	char *string;
+}screen_state = {0};
 
-struct screen_error screen_error = {0};
+static void check_error(void){
+	assert(screen_state.error == SUCCESS);
+	assert(screen_state.string == 0);
+}
 
-static char *errtostr(int error){
-	static char *str[] = {
-		"SUCCESS",
-		"IO_ERROR",
-		"BAD_SYMBOL"
+static void set_error(int code){
+	static char *string[] = {
+		"SCREEN_NO_ERROR",
+		"SCREEN_SYMBOL_ERROR",
+		"SCREEN_IO_ERROR",
+		"SCREEN_UNKNOWN_ERROR"
 	};
-	return str[error];
+	screen_state.error = code;
+	screen_state.string = &string[code];
 }
 
-static void set_error(int error){
-	screen_error.code = error;
-	screen_error.str = errtostr(error);
+void get_error(int *code, char *string){
+	code = &screen_state.error;
+	string = screen_state.string;
 }
 
-static struct icon screen[SCREEN_SIZE] = {0};
 
-static char itoc(int i){
-	return i + '0';
-}
+struct color{
+	unsigned int foreground : 4;
+	unsigned int background : 4;
+};
 
-static int put_color(struct icon ic){
-	static char str[] = "\033[0;30;40m";
-	str[2] = itoc(ic.glow);
-	str[5] = itoc(ic.fg);
-	str[8] = itoc(ic.bg);
-	if(printf("%s", str) == EOF){
+static int put_color(struct color color){
+	static char *string = "\033[30;40m";
+	check_error();
+	string[3] = color.foreground + '0';
+	string[6] = color.background + '0';
+	if(printf("%s", string) == EOF){
 		set_error(IO_ERROR);
 		return -1;
 	}
 	return 0;
 }
 
-static int put_color_clear(void){
-	if(printf("\033[0m") == EOF){
+
+struct icon{
+	unsigned int glow : 1;
+	unsigned int symbol : 7;
+	struct color color;
+};
+
+static int put_glow(int glow){
+	static char *string = "\033[0m";
+	check_error();
+	string[2] = glow;
+	if(printf("%s", string) == EOF){
 		set_error(IO_ERROR);
 		return -1;
 	}
@@ -48,8 +72,9 @@ static int put_color_clear(void){
 }
 
 static int put_symbol(char symbol){
+	check_error();
 	if(!isgraph(symbol)){
-		set_error(BAD_SYMBOL);
+		set_error(SYMBOL_ERROR);
 		symbol = '?';
 	}
 	if(putchar(symbol) == EOF){
@@ -59,82 +84,57 @@ static int put_symbol(char symbol){
 	return 0;
 }
 
-static int put_icon(struct icon ic){
-	if(put_color(ic) != 0)
+static int put_icon(struct icon icon){
+	check_error();
+	if(put_glow(icon.glow) != 0)
 		return -1;
-	if(put_symbol(ic.symbol) != 0)
-		return -1;
+	if(put_color(icon.color) != 0)
+		return -2;
+	if(put_symbol(icon.symbol) != 0)
+		return -3;
 	return 0;
 }
 
-static int print_icon(struct icon *arr,
-		size_t len){
-	size_t i = 0;
-	for(; i < len; i++, arr++){
-		if(put_icon(*arr) != 0)
+static int print_icon(struct icon *array,
+		size_t size){
+	size_t count = 0;
+	check_error();
+	for(; count < size; count++, array++){
+		if(put_icon(*array) != 0)
 			break;
 	}
-	return i;
+	return count;
 }
 
 
-void fillscr(struct icon ic){
-	for(int i = 0; i < SCREEN_SIZE; i++)
-		screen[i] = ic;
-}
+#define SCREEN_WIDTH	40
+#define SCREEN_HEIGHT	20
+#define SCREEN_SIZE	(SCREEN_WIDTH *	\
+		SCREEN_HEIGHT)
 
-void clearscr(void){
-	static struct icon clear_icon = {
-		0,
-		'#',
-		ICON_RED,
-		ICON_BLACK
-	};
-	fillscr(clear_icon);
-}
+static struct icon screen[SCREEN_SIZE] = {0};
 
-static int xytoi(int x, int y){
-	return x + y * SCREEN_WIDTH;
-}
-
-void scrput(struct icon ic, size_t x,
-		size_t y){
-	screen[xytoi(x, y)] = ic;
-}
-
-struct icon scrget(size_t x, size_t y){
-	return screen[xytoi(x, y)];
-}
-
-static int next_line(void){
-	if(put_color_clear() != 0)
+static int set_next_row(void){
+	if(put_glow(0) != 0)
 		return -1;
 	if(putchar('\n') == EOF){
 		set_error(IO_ERROR);
-		return -1;
+		return -2;
 	}
 	return 0;
 }
 
-int putscr(void){
-	int off = 0;
-	int fail_point = 0;
-	int tmp0 = 0;
-	int tmp1 = 0;
-	for(int y = SCREEN_HEIGHT - 1; y > -1;
-			y--){
-		off = y * SCREEN_WIDTH;
-		tmp0 = print_icon(screen + off,
-				SCREEN_WIDTH);
-		tmp1 += tmp0;
-		if(tmp0 != SCREEN_WIDTH)
-			goto fail;
-		if(next_line() != 0)
-			goto fail;
-		continue;
-fail:
-		fail_point = tmp1;
-		break;
+int put_screen(void){
+	size_t count = 0, offset, tmp;
+	for(int row = SCREEN_HEIGHT - 1; row > -1; row--){
+		offset = row * SCREEN_WIDTH;
+		tmp = print_icon(screen + offset,
+					SCREEN_WIDTH);
+		count += tmp;
+		if(tmp != SCREEN_WIDTH)
+			break;
+		if(set_next_row() != 0)
+			break;
 	}
-	return fail_point;
+	return count;
 }
