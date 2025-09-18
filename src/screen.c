@@ -1,140 +1,140 @@
 #include "screen.h"
-#include <assert.h>
-#include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
-#include <ctype.h>
-
-static struct{
-	enum{
-		SUCCESS = 0,
-		SYMBOL_ERROR,
-		IO_ERROR,
-		FAILURE
-	}error;
-	char *string;
-}screen_state = {0};
-
-static void check_error(void){
-	assert(screen_state.error == SUCCESS);
-	assert(screen_state.string == 0);
-}
-
-static void set_error(int code){
-	static char *string[] = {
-		"SCREEN_NO_ERROR",
-		"SCREEN_SYMBOL_ERROR",
-		"SCREEN_IO_ERROR",
-		"SCREEN_UNKNOWN_ERROR"
-	};
-	screen_state.error = code;
-	screen_state.string = &string[code];
-}
-
-void get_error(int *code, char *string){
-	code = &screen_state.error;
-	string = screen_state.string;
-}
 
 
-struct color{
-	unsigned int foreground : 4;
-	unsigned int background : 4;
+/*
+ * We need to color an icon, which is a part
+ * of a screen.
+ */
+
+enum screen_color{
+	SCREEN_BLACK = 0,
+	SCREEN_GREEN,
+	SCREEN_YELLOW,
+	SCREEN_BLUE,
+	SCREEN_PURPLE,
+	SCREEN_CYAN,
+	SCREEN_WHITE
 };
 
-static int put_color(struct color color){
-	static char *string = "\033[30;40m";
-	check_error();
-	string[3] = color.foreground + '0';
-	string[6] = color.background + '0';
-	if(printf("%s", string) == EOF){
-		set_error(IO_ERROR);
+#define set_color_foreground(_color,	\
+		_foreground)	\
+		(_color |= (uint8_t)_foreground << 4)
+
+#define set_color_background(_color,	\
+		_background)	\
+		(_color |= (uint8_t)_background << 4)
+
+static uint8_t make_color(
+		enum screen_color foreground,
+		enum screen_color background){
+	uint8_t color = 0;
+	set_color_foreground(color, foreground);
+	set_color_background(color, background);
+	return color;
+}
+
+#define get_color_foreground(_color)	\
+	(_color >> 4)
+
+#define get_color_background(_color)	\
+	(_color & 0x0f)
+
+static int put_color_foreground(
+		enum screen_color foreground){
+	if(printf("\033[3%d", foreground) == EOF)
 		return -1;
-	}
 	return 0;
 }
 
-
-struct icon{
-	unsigned int glow : 1;
-	unsigned int symbol : 7;
-	struct color color;
-};
-
-static int put_glow(int glow){
-	static char *string = "\033[0m";
-	check_error();
-	string[2] = glow;
-	if(printf("%s", string) == EOF){
-		set_error(IO_ERROR);
+static int put_color_background(
+		enum screen_color background){
+	if(printf("\033[3%d", background) == EOF)
 		return -1;
-	}
 	return 0;
 }
 
-static int put_symbol(char symbol){
-	check_error();
-	if(!isgraph(symbol)){
-		set_error(SYMBOL_ERROR);
-		symbol = '?';
-	}
-	if(putchar(symbol) == EOF){
-		set_error(IO_ERROR);
+static int put_color(uint8_t color){
+	if(put_color_foreground(
+				get_color_foreground(color))
+			!= 0)
 		return -1;
-	}
-	return 0;
-}
-
-static int put_icon(struct icon icon){
-	check_error();
-	if(put_glow(icon.glow) != 0)
-		return -1;
-	if(put_color(icon.color) != 0)
+	if(put_color_background(
+				get_color_background(color))
+			!= 0)
 		return -2;
-	if(put_symbol(icon.symbol) != 0)
-		return -3;
 	return 0;
 }
 
-static int print_icon(struct icon *array,
-		size_t size){
-	size_t count = 0;
-	check_error();
-	for(; count < size; count++, array++){
-		if(put_icon(*array) != 0)
-			break;
-	}
-	return count;
+
+/*
+ * We also need a symbol for the icon to
+ * display.
+ */
+
+#define set_symbol_glow(_symbol, _glow)	\
+	((uint8_t)_symbol |=	\
+	 ((uint8_t)_glow << 7))
+
+#define set_symbol_value(_symbol, _value)	\
+	((uint8_t)_symbol |= (uint8_t)_value)
+
+static uint8_t make_symbol(uint8_t glow,
+		uint8_t value){
+	uint8_t symbol = 0;
+	set_symbol_glow(symbol, glow);
+	set_symbol_value(symbol, value);
+	return symbol;
 }
 
+#define get_symbol_glow(_symbol)	\
+	((uint8_t)_symbol >> 7)
 
-#define SCREEN_WIDTH	40
-#define SCREEN_HEIGHT	20
-#define SCREEN_SIZE	(SCREEN_WIDTH *	\
-		SCREEN_HEIGHT)
+#define get_symbol_value(_symbol)	\
+	((uint8_t)_symbol & 0x7f)
 
-static struct icon screen[SCREEN_SIZE] = {0};
-
-static int set_next_row(void){
-	if(put_glow(0) != 0)
+static int put_symbol_glow(uint8_t glow){
+	if(printf("\033[%dm", glow) == EOF)
 		return -1;
-	if(putchar('\n') == EOF){
-		set_error(IO_ERROR);
-		return -2;
-	}
 	return 0;
 }
 
-int put_screen(void){
-	size_t count = 0, offset, tmp;
-	for(int row = SCREEN_HEIGHT - 1; row > -1; row--){
-		offset = row * SCREEN_WIDTH;
-		tmp = print_icon(screen + offset,
-					SCREEN_WIDTH);
-		count += tmp;
-		if(tmp != SCREEN_WIDTH)
-			break;
-		if(set_next_row() != 0)
-			break;
-	}
-	return count;
+static int put_symbol_value(uint8_t value){
+	if(putchar(value) == EOF)
+		return -1;
+	return 0;
 }
+
+static int put_symbol(uint8_t symbol){
+	if(put_symbol_glow(
+				get_symbol_glow(symbol)) != 0)
+		return -1;
+	if(put_symbol_value(
+				get_symbol_value(symbol))
+			!= 0)
+		return -2;
+	return 0;
+}
+
+
+/*
+ * And finally, the icon, a part of the
+ * screen.
+ */
+
+#define set_icon_color(_icon, _color)	\
+	((uint8_t)_icon |= (uint8_t)_color << 8)
+
+#define set_icon_symbol(_icon, _symbol)	\
+	((uint8_t)_icon |= (uint8_t)_symbol << 8)
+
+static uint16_t make_icon(uint8_t color,
+		uint8_t symbol){
+	uint16_t icon = 0;
+	set_icon_color(icon, color);
+	set_icon_symbol(icon, symbol);
+	return icon;
+}
+
+/* TODO */
