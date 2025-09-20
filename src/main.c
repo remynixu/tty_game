@@ -1,5 +1,5 @@
-#include "screen.h"
+#include "game/gm.h"
 
 int main(void){
-	return 0;
+	return gm(0);
 }
