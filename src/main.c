@@ -1,5 +1,5 @@
-#include "game/gm.h"
+#include <stdio.h>
 
 int main(void){
-	return gm(0);
+	return 0;
 }
