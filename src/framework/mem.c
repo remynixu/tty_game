@@ -1,62 +1,121 @@
 #include "mem.h"
 
+#ifndef NULL
+#define NULL	((void *)0)
+#endif /* NULL */
+
 /*
- * To manage a memory, it's size and status must be properly identified.
+ * How do we allocate memory?
  *
- * A block is used to make memory pools easier to manage. It has information
- * about the memory's size and status (whether it's free or not).
- *
- * Byte alignment is defined by the 'MEM_ALIGNMENT' macro, changeable by the
- * user.
- *
+ * 	FORMATTING MEMORY INTO BLOCKS
+ * First, we format our byte buffer into something we can work with. This format
+ * is called a block. It must contain the following:
+ * - Block size   - The size of the entire block, is not less than the value of
+ *                  BLOCK_METADATA_BYTEWIDTH.
+ * - Block status - Holds the status of the block, used for defining the current
+ *                  options for the block.
+ *                - Here are the possible status:
+ *                  - BLOCK_FREE
+ *                  - BLOCK_USED
+ * - Memory size  - The size of the memory contained within the block, is not 
+ *                  equal or less than the value of BLOCK_METADATA_BYTEWIDTH.
  * Block sections:
- * - The header section will have a width defined by the HEADER_BYTEWIDTH macro,
- *   enough to hold the value that contains the size of the memory section.
- * - The memory section will be simple: if the memory is free, the bytes will
- *   hold the value of the FREE_MEM macro. Else, the bytes will hold the value
- *   of the USED_MEM macro.
+ * - Header       - Contains the Memory size, located at the beginning of the
+ *                  block.
+ * - Memory       - Contains the usable raw buffer that is allocatable or vice
+ *                  versa.
+ * - Footer       - Contains the Block status, located at the end of the block.
  *
- * Block informations:
- * - 'size/sz' is the size of the entire block.
- * - 'memsize/memsz' is the size of the memory section.
- * - 'status/stat' defines whether the block is free or not.
+ * 	MANIPULATING A BLOCK
+ * Now that we have a block, we can start managing it. This is also the part
+ * where the process of allocation and freeing is described:
+ * - Allocation   - To allocate a block, we first split a block into two. One for
+ *                  the requested memory size, and another free block, valid for
+ *                  another allocation.
+ * - Freeing      - To free a block, we reformat the block into a free one. And if
+ *                  possible, merge it with another free block.
  *
- * Block processes:
- * - To 'allocate', the block will be split into two. One for the requested
- *   memory size, and the other will be free for more allocations.
- * - To 'free' a memory, the block is simply be reformatted as a free block and
- *   if possible, merged with other blocks to form a big free block.
+ * 	TRACKING THE BLOCKS
+ * Splitting blocks are fine, but how do we track how many blocks are there? We
+ * need to do so to also track the amount of bytes we are working with.
+ * - Block count  - Only applies to the first/main block, tracks the amount of
+ *                  blocks, especially after functions split or merge blocks in
+ *                  the main block.
+ *
+ * 	EXTRA BLOCK INFORMATION
+ * For extra information, some systems require specific byte alignments. We can
+ * compensate by making functions take the macro MEMORY_ALIGNMENT into account.
+ *
+ * 	RATIONALE
+ * Why a block? It is simple enough for me, and I don't see why I should go all
+ * out on such a silly and unserious library...
  */
 
-#define MEM_ALIGNMENT	sizeof(unsigned long)
 #define HEADER_BYTEWIDTH	sizeof(unsigned long)
-#define FREE_MEM	1
-#define USED_MEM	0
+#define FOOTER_BYTEWIDTH	sizeof(unsigned char)
+#define METADATA_BYTEWIDTH	(HEADER_BYTEWIDTH + FOOTER_BYTEWIDTH)
 
-static void *_header_pos(void *buf){
-	return buf;
+static void _header(void *hdr, unsigned long mem_sz){
+	unsigned long *h = (unsigned long *)hdr;
+	*h = mem_sz;
 }
 
-static void _header_fmt(void *hdr, unsigned long memsz){
-	*hdr = memsz;
+static void *_memory_pos(void *blk){
+	return (char *)blk + HEADER_BYTEWIDTH;
 }
 
-static void *_mem_pos(void *buf){
-	return (char *)buf + HEADER_BYTEWIDTH;
+static void _memory(void *mem, unsigned long mem_sz){
+	unsigned long i = 0;
+	unsigned char *m = (unsigned char *)mem;
+	for(; i < mem_sz; i++)
+		m[i] = 0;
+}
+
+static void *_footer_pos(void *blk){
+	return (char *)blk + FOOTER_BYTEWIDTH;
+}
+
+static void _footer(void *ftr, unsigned char sts){
+	unsigned char *f = (unsigned char *)ftr;
+	*f = sts;
 }
 
 static unsigned long _to_memsz(unsigned long sz){
-	return sz - HEADER_BYTEWIDTH;
+	return sz - METADATA_BYTEWIDTH;
 }
 
-static void _mem_fmt(void *mem, unsigned long memsz, unsigned char stat){
-	unsigned long i = 0;
-	for(; i < sz; i++)
-		mem[i] = stat;
+#define BLOCK_FREE	0
+#define BLOCK_USED	1
+
+static void *__blkfmt(void *blk, unsigned long sz, unsigned char sts){
+	/* Assumes that 'blk' is the start of the buffer to format. */
+	_header(blk, _to_memsz(sz));
+	_memory(_memory_pos(blk), _to_memsz(sz));
+	_footer(_footer_pos(blk), sts);
+	return blk;
 }
 
-void *blkfmt(void *buf, unsigned long sz, unsigned char stat){
-	_header_fmt(_header_pos(buf), _to_memsz(sz));
-	_memory_fmt(_mem_pos(buf), _to_memsz(sz), stat);
-	return buf;
+static void *_main_block(void *buf, unsigned long sz){
+	_header(buf, 1);
+	buf = (void *)((char *)buf + HEADER_BYTEWIDTH);
+	sz -= HEADER_BYTEWIDTH;
+	return (char *)__blkfmt(buf, sz, BLOCK_FREE) - HEADER_BYTEWIDTH;
 }
+
+/*
+ * Unlike __blkfmt() which returns a normal block, this must only return a main
+ * block. It isn't made for most private uses, use __blkfmt() for that instead.
+ */
+
+void *blkfmt(void *buf, unsigned long sz){
+	void *blk = NULL;
+	if(!buf)
+		goto out;
+	if(sz < METADATA_BYTEWIDTH)
+		goto out;
+	blk = _main_block(buf, sz);
+out:
+	return blk;
+}
+
+/* TODO: split(), free(), and merge(). */

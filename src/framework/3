@@ -1,0 +1,42 @@
+#include "mem.h"
+
+/*
+ * How do we allocate memory?
+ *
+ * 	FORMATTING MEMORY INTO BLOCKS
+ * First, we format our byte buffer into something we can work with. This format
+ * is called a block. It must contain the following:
+ * - Block size   - The size of the entire block, is not less than the value of
+ *                  BLOCK_METADATA_BYTEWIDTH.
+ * - Block status - Holds the status of the block, used for defining the current
+ *                  options for the block.
+ *                - Here are the possible status:
+ *                  - BLOCK_FREE
+ *                  - BLOCK_USED
+ * - Memory size  - The size of the memory contained within the block, is not 
+ *                  equal or less than the value of BLOCK_METADATA_BYTEWIDTH.
+ *
+ * 	MANIPULATING A BLOCK
+ * Now that we have a block, we can start managing it. This is also the part
+ * where the process of allocation and freeing is described:
+ * - Allocation   - To allocate a block, we first split a block into two. One for
+ *                  the requested memory size, and another free block, valid for
+ *                  another allocation.
+ * - Freeing      - To free a block, we reformat the block into a free one. And if
+ *                  possible, merge it with another free block.
+ *
+ * 	TRACKING THE BLOCKS
+ * Splitting blocks are fine, but how do we track how many blocks are there? We
+ * need to do so to also track the amount of bytes we are working with.
+ * - Block count  - Only applies to the first/main block, tracks the amount of
+ *                  blocks, especially after functions split or merge blocks in
+ *                  the main block.
+ *
+ * 	EXTRA BLOCK INFORMATION
+ * For extra information, some systems require specific byte alignments. We can
+ * compensate by making functions take the macro MEMORY_ALIGNMENT into account.
+ *
+ * 	RATIONALE
+ * Why a block? It is simple enough for me, and I don't see why I should go all
+ * out on such an unserious library.
+ */
