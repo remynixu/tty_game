@@ -11,10 +11,4 @@
  * - remynixu
  */
 
-/* TODO: test it out! */
-
-void *blkfmt(void *buf, unsigned long sz);
-void *hold(void *blk, unsigned long mem_sz);
-void release(void *blk, void *mem_ptr);
-
 #endif /* MEM_H */
