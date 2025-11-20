@@ -71,8 +71,8 @@ char *blk_strerror(void){
  */
 
 struct _hdr{
-	blk_size_t pyld_sz;
 	blk_size_t fl;
+	blk_size_t pyld_sz;
 	struct _hdr *next;
 };
 
@@ -82,13 +82,18 @@ struct _hdr{
 
 enum _flag{
 	_FL_FREE = 1 << 0,
-	_FL_GIVEN = 1 << 1
+	_FL_GIVEN = 1 << 1,
+	_FL_MAGIC = 0xA << 3
 };
+
+static char mkfl(enum _flag hint){
+	return hint | _FL_MAGIC;
+}
 
 static struct _hdr mkhdr(blk_size_t pyld_sz, enum _flag fl, struct _hdr *next){
 	struct _hdr hdr;
-	hdr.pyld_sz = pyld_sz;
 	hdr.fl = fl;
+	hdr.pyld_sz = pyld_sz;
 	hdr.next = next;
 	return hdr;
 }
@@ -126,11 +131,14 @@ static blk_size_t _sz(void *blk){
 	return _psztosz(_pyld_sz(blk));
 }
 
+/* Needs to be supplied a pointer because of C90 standard :P */
+
+#define for_each_blk(ptr)	for(; _tohdr(ptr); (ptr) = _tohdr(ptr)->next)
+
 static blk_size_t _sz_all(void *blk){
-	struct _hdr *ptr = _tohdr(blk);
 	blk_size_t sz = 0;
-	for(; ptr; ptr = ptr->next)
-		sz += _sz(ptr);
+	for_each_blk(blk)
+		sz += _sz(blk);
 	return sz;
 }
 
@@ -150,7 +158,7 @@ static int _sz_ok(blk_size_t sz){
 }
 
 void *blkfmt(void *buf, blk_size_t sz){
-	struct _hdr hdr = mkhdr(_sztopsz(sz), _FL_FREE, NULL);
+	struct _hdr hdr = mkhdr(_sztopsz(sz), mkfl(_FL_FREE), NULL);
 	if(!buf)
 		goto err;
 	if(!_sz_ok(sz))
@@ -163,8 +171,23 @@ err:
 	return NULL;
 }
 
-void dump_byte(char c, int (*putchar_fn)(char)){
+static void _print(char *str, int (*putchar_fn)(int)){
+	for(; *str; str++)
+		putchar_fn(*str);
+}
+
+static void __dump_byte(char c, int (*putchar_fn)(int)){
+	int is_flag = (c & (char)(255 << 2)) == _FL_MAGIC;
+	if(is_flag)
+		_print("\001\033[31;40m", putchar_fn);
+	dump_byte(c, putchar_fn);
+	if(is_flag)
+		_print("\033[0m\002", putchar_fn);
+}
+
+void dump_byte(char c, int (*putchar_fn)(int)){
 	int i = (sizeof(c) * 8) - 1;
+	int is_flag = (c & (char)(255 << 2)) == _FL_MAGIC;
 	char bit_char;
 	for(; i > -1; i--){
 		bit_char = ((c & (1 << i)) && 1) + '0';
@@ -173,12 +196,12 @@ void dump_byte(char c, int (*putchar_fn)(char)){
 	putchar_fn(' ');
 }
 
-static void _dump_byte_ln(char *bytes, int (*putchar_fn)(char), blk_size_t len){
+static void _dump_byte_ln(char *bytes, int (*putchar_fn)(int), blk_size_t len){
 	for(; len; len--, bytes++)
-		dump_byte(*bytes, putchar_fn);
+		__dump_byte(*bytes, putchar_fn);
 }
 
-void blkdump(void *blk, int (*putchar_fn)(char), blk_size_t ln_len){
+void blkdump(void *blk, int (*putchar_fn)(int), blk_size_t ln_len){
 	char *__blk = blk;
 	blk_size_t i = 0;
 	blk_size_t sz = _sz_all(blk);
@@ -202,21 +225,31 @@ static void *__blkalloc(void *blk, blk_size_t pyld_sz){
 	struct _hdr hint2;
 	void *blk1;
 	void *blk2;
-	hint1 = mkhdr(_pyld_sz(blk) - _psztosz(pyld_sz), _FL_FREE, NULL);
-	hint2 = mkhdr(pyld_sz, _FL_GIVEN, _tohdr(blk)->next);
+	hint1 = mkhdr(_pyld_sz(blk) - _psztosz(pyld_sz), mkfl(_FL_FREE), NULL);
+	hint2 = mkhdr(pyld_sz, mkfl(_FL_GIVEN), _tohdr(blk)->next);
 	blk1 = _ldhdr(blk, &hint1);
 	blk2 = _ldhdr(_next(blk1), &hint2);
 	_tohdr(blk1)->next = blk2;
 	return blk2;
 }
 
+/*
+ * TODO:
+ * - Segfault at miscalculated memory to be taken.
+ */
+
 void *blkalloc(void *blk, blk_size_t sz){
-	if(!blk)
+	if(!blk){
+		_seterr(_ERR_BADARGS);
 		goto err;
+	}
+	if(_psztosz(sz) > _sz(blk)){
+		_seterr(_ERR_LACKMEM);
+		goto err;
+	}
 	_seterr(_ERR_NOERROR);
 	return __blkalloc(blk, sz);
 err:
-	_seterr(_ERR_BADARGS);
 	return NULL;
 }
 
