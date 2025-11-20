@@ -19,7 +19,11 @@
 
 typedef unsigned long blk_size_t;
 
+int blkerr(void);
+char *blk_strerror(void);
+
 void *blkfmt(void *buf, blk_size_t sz);
+void blkdump(void *blk, int (*putchar_fn)(char), blk_size_t nl);
 void *blkalloc(void *blk, blk_size_t sz);
 
 #endif /* BLOCK_H */

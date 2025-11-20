@@ -1,11 +1,73 @@
 #include "block.h"
 
 /*
+ * Standard function copies.
+ */
+
+void *blk_memcpy(void *dest, void *src, blk_size_t sz){
+	char *__dest = dest;
+	char *__src = src;
+	blk_size_t i = 0;
+	for(; i < sz; i++)
+		__dest[i] = __src[i];
+	return dest;
+}
+
+void *blk_memset(void *dest, char src, blk_size_t sz){
+	char *__dest = dest;
+	blk_size_t i = 0;
+	for(; i < sz; i++)
+		__dest[i] = src;
+	return dest;
+}
+
+/*
  * A block consists of:
  * - header
  *   - payload size
  *   - flags
  * - payload
+ */
+
+void __no_effect(void){
+	return;
+}
+
+/*
+ * Errors for users.
+ */
+
+enum _err{
+	_ERR_FAILURE = -1,
+	_ERR_NOERROR,
+	_ERR_BADARGS,
+	_ERR_LACKMEM
+}_err = _ERR_NOERROR;
+
+static enum _err _geterr(void){
+	return _err;
+}
+
+static void _seterr(enum _err err){
+	_err = err;
+}
+
+int blkerr(void){
+	return _geterr();
+}
+
+char *blk_strerror(void){
+	static char errstr[4][16] = {
+		"Unknown Failure",
+		"No Block Errors",
+		"Bad Instruction",
+		"Short of Memory"
+	};
+	return errstr[_geterr() + 1];
+}
+
+/*
+ * The header is consistent, hence why it's a struct.
  */
 
 struct _hdr{
@@ -15,58 +77,15 @@ struct _hdr{
 };
 
 /*
- * The header is consistent, hence why it's a struct.
- *
- * The payload is found after the header, it's size is varied because we don't
- * know how many bytes the user will request.
- *
- * We also need to track the amount of blocks, and the list's size is varied,
- * which is why we will use a linked list.
+ * Flags are used for status checks.
  */
 
-#define _pyld_pos(blk)	((struct _hdr *)(blk) + 1)
+enum _flag{
+	_FL_FREE = 1 << 0,
+	_FL_GIVEN = 1 << 1
+};
 
-static blk_size_t _sz_to_pyldsz(blk_size_t sz){
-	return sz - sizeof(struct _hdr);
-}
-
-static blk_size_t _pyldsz_to_sz(blk_size_t pyld_sz){
-	return pyld_sz + sizeof(struct _hdr);
-}
-
-#define FL_FREE		(1 << 0)
-#define FL_GIVEN	(1 << 1)
-
-static void *ldhdr(void *buf, struct _hdr *hint){
-	struct _hdr *hdr_pos = buf;
-	*hdr_pos = *hint;
-	return hdr_pos;
-}
-
-void *blkfmt(void *buf, blk_size_t sz){
-	struct _hdr hint = {
-		0,
-		FL_FREE,
-		NULL
-	};
-	hint.pyld_sz = _sz_to_pyldsz(sz);
-	return ldhdr(buf, &hint);
-}
-
-/*
- * To allocate from a block, it'll be split into two - one for the requested
- * memory, and another remainder for other allocations.
- */
-
-static struct _hdr *_tohdr(void *blk){
-	return blk;
-}
-
-#define _pyldsz(blk)	_tohdr(blk)->pyld_sz
-#define _sz(blk)	_pyldsz_to_sz(_pyldsz(blk))
-#define _next_pos(blk)	((char *)(blk) + _sz(blk))
-
-static struct _hdr sethdr(blk_size_t pyld_sz, blk_size_t fl, struct _hdr *next){
+static struct _hdr mkhdr(blk_size_t pyld_sz, enum _flag fl, struct _hdr *next){
 	struct _hdr hdr;
 	hdr.pyld_sz = pyld_sz;
 	hdr.fl = fl;
@@ -74,73 +93,135 @@ static struct _hdr sethdr(blk_size_t pyld_sz, blk_size_t fl, struct _hdr *next){
 	return hdr;
 }
 
+static struct _hdr *_tohdr(void *blk){
+	return blk;
+}
+
+static blk_size_t sizeof_hdr(void){
+	return sizeof(struct _hdr);
+}
+
 /*
- * Expected that 'sz' is less than _sz('blk').
+ * The payload is found after the header, it's size is varied because we don't
+ * know how many bytes the user will request.
  */
 
-static void *_split(void **blk, blk_size_t sz, blk_size_t fl1, blk_size_t fl2){
-	struct _hdr hint1 = sethdr(sz, fl1, NULL);
-	struct _hdr hint2 = sethdr(_sz(blk) - sz, fl2, NULL);
-	void *blk1 = *blk;
+static blk_size_t _pyld_sz(void *blk){
+	return _tohdr(blk)->pyld_sz;
+}
+
+static blk_size_t _sz_to_pyld_sz(blk_size_t sz){
+	return sz - sizeof_hdr();
+}
+
+#define _sztopsz(sz)	_sz_to_pyld_sz(sz)
+
+static blk_size_t _pyld_sz_to_sz(blk_size_t pyld_sz){
+	return pyld_sz + sizeof_hdr();
+}
+
+#define _psztosz(psz)	_pyld_sz_to_sz(psz)
+
+static blk_size_t _sz(void *blk){
+	return _psztosz(_pyld_sz(blk));
+}
+
+static blk_size_t _sz_all(void *blk){
+	struct _hdr *ptr = _tohdr(blk);
+	blk_size_t sz = 0;
+	for(; ptr; ptr = ptr->next)
+		sz += _sz(ptr);
+	return sz;
+}
+
+/*
+ * We also need to track the amount of blocks, and the list's size is varied,
+ * which is why we will use a linked list.
+ */
+
+static void *_ldhdr(void *dest, struct _hdr *hdr){
+	struct _hdr *__dest = dest;
+	*__dest = *hdr;
+	return __dest;
+}
+
+static int _sz_ok(blk_size_t sz){
+	return sz > sizeof_hdr();
+}
+
+void *blkfmt(void *buf, blk_size_t sz){
+	struct _hdr hdr = mkhdr(_sztopsz(sz), _FL_FREE, NULL);
+	if(!buf)
+		goto err;
+	if(!_sz_ok(sz))
+		goto err;
+	blk_memset(buf, 0, sz);
+	_seterr(_ERR_NOERROR);
+	return _ldhdr(buf, &hdr);
+err:
+	_seterr(_ERR_BADARGS);
+	return NULL;
+}
+
+void dump_byte(char c, int (*putchar_fn)(char)){
+	int i = (sizeof(c) * 8) - 1;
+	char bit_char;
+	for(; i > -1; i--){
+		bit_char = ((c & (1 << i)) && 1) + '0';
+		putchar_fn(bit_char);
+	}
+	putchar_fn(' ');
+}
+
+static void _dump_byte_ln(char *bytes, int (*putchar_fn)(char), blk_size_t len){
+	for(; len; len--, bytes++)
+		dump_byte(*bytes, putchar_fn);
+}
+
+void blkdump(void *blk, int (*putchar_fn)(char), blk_size_t ln_len){
+	char *__blk = blk;
+	blk_size_t i = 0;
+	blk_size_t sz = _sz_all(blk);
+	for(; i < sz; i += ln_len, __blk += ln_len){
+		_dump_byte_ln(__blk, putchar_fn, ln_len);
+		putchar_fn('\n');
+	}
+}
+
+/*
+ * To allocate from a block, it'll be split into two - one for the requested
+ * memory, and another remainder for other allocations.
+ */
+
+static void *_next(void *blk){
+	return (char *)blk + _sz(blk);
+}
+
+static void *__blkalloc(void *blk, blk_size_t pyld_sz){
+	struct _hdr hint1;
+	struct _hdr hint2;
+	void *blk1;
 	void *blk2;
-	blk1 = ldhdr(*blk, &hint1);
-	*blk = _next_pos(*blk);
-	blk2 = ldhdr(*blk, &hint2);
-	_tohdr(blk1)->next = blk2; /* currently contemplating double pointers */
-	return blk1;
+	hint1 = mkhdr(_pyld_sz(blk) - _psztosz(pyld_sz), _FL_FREE, NULL);
+	hint2 = mkhdr(pyld_sz, _FL_GIVEN, _tohdr(blk)->next);
+	blk1 = _ldhdr(blk, &hint1);
+	blk2 = _ldhdr(_next(blk1), &hint2);
+	_tohdr(blk1)->next = blk2;
+	return blk2;
+}
+
+void *blkalloc(void *blk, blk_size_t sz){
+	if(!blk)
+		goto err;
+	_seterr(_ERR_NOERROR);
+	return __blkalloc(blk, sz);
+err:
+	_seterr(_ERR_BADARGS);
+	return NULL;
 }
 
 /* We must also find a suitable block to split. */
 
-static void *_find(struct _hdr *head, blk_size_t fl){
-	struct _hdr *curr = head;
-	for(; curr->next != NULL; curr = curr->next){
-		if(curr->fl & fl)
-			break;
-	}
-	return curr;
-}
-
-static void *__blkalloc(void *blk, blk_size_t pyld_sz){
-	blk = _find(blk, FL_FREE);
-	return _split(&blk, pyld_sz + sizeof(struct _hdr), FL_GIVEN, FL_FREE);
-}
-
-void *blkalloc(void *blk, blk_size_t sz){
-	if(sz > _sz(blk))
-		return NULL;
-	return _pyld_pos(__blkalloc(blk, sz));
-}
-
 /*
  * To mitigate fragmentation, we merge some mergeable blocks.
  */
-
-static void *_merge(void *blk1, void *blk2){
-	return blkfmt(blk1, _sz(blk1) + _sz(blk2));
-}
-
-#define _merge_ok(blk)	(_tohdr(_next_pos(blk))->fl & FL_FREE)
-
-static int defrag_once(struct _hdr *head){
-	void *blk = _find(head, FL_FREE);
-	int merge_cnt = 0;
-	for(; blk; blk = _find(head, FL_FREE)){
-		if(!_merge_ok(blk))
-			continue;
-		_merge(blk, _next_pos(blk));
-		merge_cnt++;
-	}
-	return merge_cnt;
-}
-
-static void defrag(struct _hdr *head){
-	while(defrag_once(head));
-}
-
-#define _hdr_pos(ptr)	((struct _hdr *)(ptr) - 1)
-
-void blkfree(void *blk, void *ptr){
-	void *blk1 = _hdr_pos(ptr);
-	blkfmt(blk1, _sz(blk1));
-}

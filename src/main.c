@@ -2,13 +2,10 @@
 #include "framework/block.h"
 
 int main(void){
-	char test[100] = {0};
+	char test[100];
+	char msg[100] = {0};
 	void *blk = blkfmt(test, 100);
-	char *ptr = blkalloc(blk, 10);
-	printf("yay! | %p | %p |\n", blk, ptr);
-	*ptr = 'L';
-	printf("%c\n", *ptr);
-	blkfree(blk, ptr);
-	printf("yay! | %p | %p |\n", blk, ptr);
+	void *ptr = blkalloc(blk, 20); 
+	blkdump(blk, putchar, 8);
 	return 0;
 }
