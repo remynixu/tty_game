@@ -13,19 +13,13 @@
  * - remynixu
  */
 
+/*
+ * Constants :>
+ *
+ * This could be a standalone library if "NULL" and "size_t" are defined.
+ */
 
-
-#ifndef NULL
-#define NULL	((void *)0)
-#endif /* NULL */
-
-#ifndef DEFINED_BLOCK_SIZE_T
-#define DEFINED_BLOCK_SIZE_T
-
-/* Rely on a self-defined size_t. */
-typedef unsigned long _block_size_t;
-
-#endif /* DEFINED_BLOCK_SIZE_T */
+#include "presets.h"
 
 
 
@@ -36,7 +30,7 @@ typedef unsigned long _block_size_t;
  * `buf` expects the buffer, and `sz` expects the size of the buffer in bytes.
  */
 
-void *blkfmt(void *buf, _block_size_t sz);
+void *blkfmt(void *buf, size_t sz);
 
 /*
  * A block, when split, is usually supposed to be treated like a linked list.
@@ -83,9 +77,11 @@ enum blksplit_mode{
  * links, essentially making two heads of a linked list if treated like so.
  */
 
-void *blksplit(void *blk, _block_size_t payload_sz, enum blksplit_mode how);
+void *blksplit(void *blk, size_t payload_sz, enum blksplit_mode how);
 
 /* WIP */
 int blkmerge(void *blk1, void *blk2);
+
+
 
 #endif /* BLOCK_H */

@@ -18,7 +18,7 @@
  *                        change this purpose.
  * The payload has:
  * - Memory             - A counted amount of raw bytes, aligned by the value of
- *                        _block_size_t.
+ *                        size_t.
  */
 
 /*
@@ -48,12 +48,12 @@ enum header_status{
 
 struct header{
 	enum header_status status;
-	_block_size_t payload_sz;
+	size_t payload_sz;
 	struct header *next;
 };
 
 static struct header mkheader(enum header_status status,
-		_block_size_t payload_sz, struct header *next){
+		size_t payload_sz, struct header *next){
 	struct header header;
 	header.status = status;
 	header.payload_sz = payload_sz;
@@ -71,15 +71,15 @@ static struct header *_to_header_ptr(void *blk){
  * Helper functions for getting info about a block.
  */
 
-static _block_size_t payload_sz_to_sz(_block_size_t payload_sz){
+static size_t payload_sz_to_sz(size_t payload_sz){
 	return payload_sz + sizeof(struct header);
 }
 
-static _block_size_t _payload_sz(void *blk){
+static size_t _payload_sz(void *blk){
 	return _to_header_ptr(blk)->payload_sz;
 }
 
-static _block_size_t _sz(void *blk){
+static size_t _sz(void *blk){
 	return payload_sz_to_sz(_payload_sz(blk));
 }
 
@@ -89,14 +89,14 @@ static _block_size_t _sz(void *blk){
  * API Functions.
  */
 
-static int _payload_sz_align(_block_size_t payload_sz){
-	return payload_sz + (payload_sz % sizeof(_block_size_t));
+static int _payload_sz_align(size_t payload_sz){
+	return payload_sz + (payload_sz % sizeof(size_t));
 }
 
-void *blkfmt(void *buf, _block_size_t sz){
+void *blkfmt(void *buf, size_t sz){
 	struct header *header_pos;
-	_block_size_t payload_sz;
-	_block_size_t aligned_payload_sz;
+	size_t payload_sz;
+	size_t aligned_payload_sz;
 	if(sz < sizeof(struct header))
 		return NULL;
 	payload_sz = sz - sizeof(struct header);
@@ -105,10 +105,10 @@ void *blkfmt(void *buf, _block_size_t sz){
 	return buf;
 }
 
-void *blksplit(void *blk, _block_size_t payload_sz, enum blksplit_mode how){
+void *blksplit(void *blk, size_t payload_sz, enum blksplit_mode how){
 	struct header *blk1_header = _to_header_ptr(blk);
 	struct header *blk2_header = NULL;
-	_block_size_t blk1_payload_sz = 0;
+	size_t blk1_payload_sz = 0;
 	enum header_status status = 0;
 	struct header *next = NULL;
 	if(_to_header_ptr(blk)->status & GIVEN)
