@@ -22,10 +22,6 @@
 #define SCREEN_HEIGHT	32
 #endif /* SCREEN_HEIGHT */
 
-#ifndef UNICODE_SUPPORT
-#define UNICODE_SUPPORT	0
-#endif /* UNICODE_SUPPORT */
-
 
 
 /* Functions */

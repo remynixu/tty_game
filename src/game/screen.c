@@ -10,18 +10,9 @@
  * - Color     - Info about the color of the "Character", made of:
  *             - Foreground - The main color of the Character.
  *             - Background - The surrounding color of the Character.
- * - Character - An ASCII character, can be unicode if you're quirky :>
- *               This is why the user can define if the screen must be "wide" or
- *               "slim" for screen flexibility, see "Screen type" for more.
- *             - Note: Not all devices supports "wchar_t" therefore it must be
- *               possible to disable through the macro "UNICODE_SUPPORT".
+ * - Character - An ASCII character.
  *
  * The dimensions of the array is defined by:
- * - Screen type   - Defines if the screen uses unicode or ascii characters.
- *                   Unlike others, it is not a constant and can be defined by
- *                   the user. Here are the values:
- *                 - Wide - If the screen uses unicode characters.
- *                 - Slim - If the screen uses ascii characters only.
  * - SCREEN_WIDTH  - The size of the row to display in the terminal.
  * - SCREEN_HEIGHT - The size of the column to display in the terminal.
  */
@@ -30,21 +21,25 @@
  * Abbreviated terms:
  * scr	| screen
  * pos	| position
+ * val	| value
  * str	| string
  * buf	| buffer
  * fmt	| format
  * sz	| size
- * wc	| wide char
+ * fg	| foreground
+ * bg	| background
  * c	| char
  */
 
 
 
 /*
- * Color >_<
+ * Colors! >o<
  */
 
-enum color_value{
+#include "framework/memory.h"
+
+enum color_val{
 	BLACK = 0,
 	RED,
 	GREEN,
@@ -55,82 +50,29 @@ enum color_value{
 	WHITE
 };
 
-unsigned char mkcolor(enum color_value fg, enum color_value bg){
+static uint8_t mkcolor(enum color_val fg, enum color_val bg){
 	return (fg << 4) | bg;
 }
 
-
-
-/*
- * Icons... :<
- */
-
-#include <stdio.h>
-
-#if UNICODE_SUPPORT == 1
-
-/*
- * Use external library for support.
- */
-
-#include <wchar.h>
-
-#else
-
-/*
- * Default the wide types into their normal counterparts.
- */
-
-typedef int wint_t;
-typedef char wchar_t;
-
-static wint_t putwchar(wchar_t wc){
-	return putchar(wc);
+static enum color_val getfg(uint8_t color){
+	return color >> 4;
 }
 
-#endif /* UNICODE_SUPPORT */
-
-/*
- * Accepts both char and wchar_t.
- * "vc" stands for "varied character" and "type" expects values from enum
- * vc_type.
- */
-
-enum vc_type{
-	VC_CHAR,
-	VC_WIDE
-};
-
-int putvchar(int vc, enum vc_type t){
-	int val = 0;
-	switch(t){
-	case VC_CHAR:
-		val = putchar(vc);
-		break;
-	case VC_WIDE:
-		val = putwchar(vc);
-		break;
-	default:
-		break;
-	}
-	return val;
+static enum color_val getbg(uint8_t color){
+	return color & 0x0f;
 }
 
-/* TODO: continue supporting unicode and ascii characters! */
+#define COLOR_STRLEN	8 /* \033[30;40m */
+#define COLOR_FG_INDEX	3
+#define COLOR_BG_INDEX	6
 
+static char itoc(int i){
+	return i + '0';
+}
 
-
-/*
- * The screen!
- */
-
-enum screen_type{
-	SLIM = 0,
-	WIDE,
-};
-
-struct screen{
-	enum screen_type type;
-	unsigned char *color_array;
-	void *icon_array;
-};
+static char *color_to_str(uint8_t color, char str[COLOR_STRLEN]){
+	memcpy(str, "\033[30;40m");
+	str[COLOR_FG_INDEX] = itoc(getfg(color));
+	str[COLOR_BG_INDEX] = itoc(getbg(color));
+	return str;
+}

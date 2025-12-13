@@ -8,7 +8,6 @@
  */
 
 #define BIT_SYSTEM	32
-#define UNICODE_SUPPORT	1
 
 
 
@@ -16,13 +15,18 @@
  * Effects of presets (>o<)
  */
 
-#if BIT_SYSTEM == 16
+#if BIT_SYSTEM == 8
+#warning "lol what the fuck are you coding this on? XD"
+typedef unsigned short size_t;
+#elif BIT_SYSTEM == 16
 typedef unsigned int size_t;
 #elif BIT_SYSTEM == 32
 typedef unsigned long size_t;
 #elif BIT_SYSTEM == 64
 typedef unsigned long long size_t;
 #endif /* BIT_SYSTEM */
+
+typedef unsigned char uint8_t;
 
 
 

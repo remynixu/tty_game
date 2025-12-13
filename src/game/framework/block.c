@@ -48,14 +48,24 @@ enum header_status{
 
 struct header{
 	enum header_status status;
+	size_t magic; /* >:) */
 	size_t payload_sz;
 	struct header *next;
 };
+
+#if BIT_SYSTEM == 16
+#define MAGIC_VALUE	"rn"
+#elif BIT_SYSTEM == 32
+#define MAGIC_VALUE	"remy"
+#elif BIT_SYSTEM == 64
+#define MAGIC_VALUE	"remynixu"
+#endif /* MAGIC_VALUE */
 
 static struct header mkheader(enum header_status status,
 		size_t payload_sz, struct header *next){
 	struct header header;
 	header.status = status;
+	header.magic = MAGIC_VALUE;
 	header.payload_sz = payload_sz;
 	header.next = next;
 	return header;
@@ -139,6 +149,7 @@ void *blksplit(void *blk, size_t payload_sz, enum blksplit_mode how){
 	return (void *)blk2_header;
 }
 
-int blkmerge(void *blk1, void *blk2){
-	return 0;
+int blkcheck(void *blk){
+	struct header *header = _to_header_ptr(blk);
+	return header->magic == MAGIC_VALUE;
 }

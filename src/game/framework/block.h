@@ -62,14 +62,22 @@ enum blksplit_mode{
  * lastly, `how` expects the "flags" from above this. Note that the flags can be
  * "or'ed" to achieve more specific results like so:
  *
+ * ```
+ *
+ * // This is how formatting a buffer is normally done!
+ * unsigned char blk[512];
+ * blkfmt(blk, 512);
+ *
  * // Random fact, this is actually the intended use of blksplit(). It is used
  * // to imitate the allocating behavior of malloc() from stdlib.h! Just make
  * // sure to pass the same block in `blk` for the next call and store the
  * // returned pointer to another void pointer.
- * blksplit(blk, 100, KEEPLINK | GIVEBLK2 | LINK1TO2);
+ * void *ptr1 = blksplit(blk, 100, KEEPLINK | GIVEBLK2 | LINK1TO2);
  *
  * // Reverse linked list?
- * blksplit(blk, 100, KEEPLINK | GIVEBLK1 | LINK2TO1);
+ * void *ptr2 = blksplit(blk, 100, KEEPLINK | GIVEBLK1 | LINK2TO1);
+ *
+ * ```
  *
  * Note:
  * 
@@ -79,8 +87,59 @@ enum blksplit_mode{
 
 void *blksplit(void *blk, size_t payload_sz, enum blksplit_mode how);
 
-/* WIP */
-int blkmerge(void *blk1, void *blk2);
+/* TODO */
+/*
+ * Sometimes, merging a block isn't doable. But don't worry, blkmerge() will let
+ * you know! :)
+ *
+ * BLKINVAL - Means the blk you passed is not actually a block or it's corrupted
+ *            by whatever magic happened...
+ *          - If this happens, make sure your blocks are valid or sane. Just use
+ *            blkcheck() for this.
+ * BLKAPART - This simply means that the blocks you passed are too far apart to
+ *            merge to begin with. Don't worry, you won't die if this happens XD
+ *          - If this happens, you can use blkmerge_findvalid() for a mergeable
+ *            block!
+ */
+
+enum merge_status{
+	BLKINVAL = 1,
+	BLKAPART,
+};
+
+/*
+ * If you're curious to see if your "block" is still a block...
+ *
+ * `blk` expects a block to check, returns 1 if it's valid, 0 if not.
+ */
+
+int blkcheck(void *blk);
+
+/* TODO */
+/*
+ * Finds at most FINDVALID_MAX amount of valid blocks.
+ *
+ * Returns a linked list of valid blocks, but returns NULL if the `blk_head` is
+ * not a head of a linked list.
+ */
+
+struct valid_blk_ll{
+	void *blk;
+	struct valid_blk_ll *next;
+}*blkmerge_findvalid(void *blk_head);
+
+/* TODO */
+/*
+ * Merges blocks, makes defragmenting memory possible.
+ *
+ * Both `blk1` and `blk2` expects a valid block.
+ *
+ * If both `blk1` and `blk2` have the same status ("given" or "free"), this will
+ * make `blk1` point to a block that combines the size and contents of the two
+ * blocks.
+ */
+
+enum merge_status blkmerge(void *blk1, void *blk2);
 
 
 
